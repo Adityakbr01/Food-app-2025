@@ -1,0 +1,38 @@
+# Node.js / Bun related
+/node_modules
+/dist
+/.bun
+/.env
+
+# TypeScript build output
+*.tsbuildinfo
+*.d.ts
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Operating System Files
+.DS_Store
+Thumbs.db
+
+# IDE/Editor related (you can modify this as per your editor)
+.vscode/
+.idea/
+
+# Test coverage reports
+coverage/
+
+# Temporary files from various build tools
+*.tmp
+*.bak
+*.swp
+
+# Package lock files (if you are using yarn, npm, etc.)
+package-lock.json
+yarn.lock
+
+# Bun generated files (optional)
+bun.lockb
