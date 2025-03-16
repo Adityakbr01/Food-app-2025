@@ -2,41 +2,48 @@
 
 import { useRegisterUserMutation } from "@/Redux/Slice/UserApiSlice";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Loader2, Mail, Lock, User, Phone, Eye, EyeOff } from "lucide-react";
-import { toast } from "sonner";
+import { Loader, Mail, Lock, User, Phone, Eye, EyeOff } from "lucide-react";
+import { z } from "zod";
+
+// ✅ **Validation Schema**
+const registerSchema = z.object({
+  name: z.string().min(3, "Name must be at least 3 characters").nonempty("Name is required"),
+  email: z.string().email("Please provide a valid email"),
+  password: z.string()
+    .min(6, "Password must be at least 6 characters")
+    .regex(/\d/, "Password must contain a number")
+    .regex(/[a-zA-Z]/, "Password must contain a letter"),
+  phoneNumber: z.string().length(10, "Phone number must be 10 digits"),
+});
 
 export default function Register() {
-  const [registerUser, { isLoading, error }] = useRegisterUserMutation();
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: "",
-    phoneNumber: "",
-  });
-
-  const [serverErrors, setServerErrors] = useState<string | null>(null);
+  const [registerUser, { isLoading }] = useRegisterUserMutation();
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+  // ✅ **React Hook Form Setup**
+  const {
+    register,
+    handleSubmit,
+    setError,
+    formState: { errors },
+    reset,
+  } = useForm({
+    resolver: zodResolver(registerSchema),
+  });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    const cleanedData = Object.fromEntries(
-      Object.entries(formData).map(([key, value]) => [key, value.trim()])
-    );
-
+  // ✅ **Submit Handler**
+  const onSubmit = async (data: any) => {
     try {
-      await registerUser(cleanedData).unwrap();
+      await registerUser(data).unwrap();
       toast.success("User registered successfully! 🎉");
-      setFormData({ name: "", email: "", password: "", phoneNumber: "" });
-      setServerErrors(null);
+      reset();
     } catch (err: any) {
       console.log("Registration Error:", err);
 
@@ -44,10 +51,23 @@ export default function Register() {
         ? err.data.errors.map((e: any) => e.msg).join(", ")
         : err?.data?.errors?.msg || err?.data?.message || "Registration failed! ❌";
 
-      setServerErrors(errorMessage);
       toast.error(errorMessage);
+
+      // Server errors ko UI pe dikhane ke liye
+      if (Array.isArray(err?.data?.errors)) {
+        err.data.errors.forEach((e: any) => {
+          setError(e.param, { message: e.msg });
+        });
+      }
     }
   };
+
+
+  const fields = [
+    { name: "name", type: "text", placeholder: "Enter your name", icon: <User size={20} /> },
+    { name: "email", type: "email", placeholder: "Enter your email", icon: <Mail size={20} /> },
+    { name: "phoneNumber", type: "tel", placeholder: "Enter your phone number", icon: <Phone size={20} /> },
+  ] as const;
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-950 px-4">
@@ -58,12 +78,8 @@ export default function Register() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-5">
-            {[
-              { name: "name", type: "text", placeholder: "Enter your name", icon: <User size={20} /> },
-              { name: "email", type: "email", placeholder: "Enter your email", icon: <Mail size={20} /> },
-              { name: "phoneNumber", type: "tel", placeholder: "Enter your phone number", icon: <Phone size={20} /> },
-            ].map((field, index) => (
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+            {fields.map((field, index) => (
               <div key={index} className="flex flex-col gap-2 relative">
                 <Label htmlFor={field.name} className="text-white capitalize">
                   {field.name.replace(/([A-Z])/g, " $1")}
@@ -71,21 +87,19 @@ export default function Register() {
                 <div className="relative">
                   <Input
                     type={field.type}
-                    name={field.name}
+                    {...register(field.name)}
                     placeholder={field.placeholder}
-                    value={formData[field.name as keyof typeof formData]}
-                    onChange={handleChange}
-                    required
                     className="bg-gray-800 text-white border-gray-700 focus:ring-2 focus:ring-blue-500 pl-10"
                   />
                   <div className="absolute inset-y-0 left-3 flex items-center text-gray-400">
                     {field.icon}
                   </div>
                 </div>
+                {errors[field.name] && <p className="text-red-500">{errors[field.name]?.message as string}</p>}
               </div>
             ))}
 
-            {/* Password Field with Show/Hide Toggle */}
+            {/* Password Field */}
             <div className="flex flex-col gap-2 relative">
               <Label htmlFor="password" className="text-white">
                 Password
@@ -93,11 +107,8 @@ export default function Register() {
               <div className="relative">
                 <Input
                   type={showPassword ? "text" : "password"}
-                  name="password"
+                  {...register("password")}
                   placeholder="Enter your password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  required
                   className="bg-gray-800 text-white border-gray-700 focus:ring-2 focus:ring-blue-500 pl-10 pr-10"
                 />
                 <div className="absolute inset-y-0 left-3 flex items-center text-gray-400">
@@ -111,6 +122,7 @@ export default function Register() {
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
               </div>
+              {errors.password && <p className="text-red-500">{errors.password.message}</p>}
             </div>
 
             {/* Submit Button */}
@@ -121,7 +133,7 @@ export default function Register() {
             >
               {isLoading ? (
                 <>
-                  <Loader2 className="animate-spin" size={20} />
+                  <Loader className="animate-spin" size={20} />
                   Registering...
                 </>
               ) : (
