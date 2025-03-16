@@ -276,3 +276,6 @@ export const recommendedItems = [
     match: "80% Match"
   }
 ];
+
+
+export const RootUrl = "http://localhost:5000/api"
