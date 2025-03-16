@@ -16,7 +16,10 @@ const app = express();
 
 // Middleware Setup
 app.use(compression());
-app.use(cors());
+app.use(cors({
+  origin: ["http://localhost:5000", "http://localhost:3000"]
+}));
+
 app.use(express.json({ limit: "50kb", strict: true }));
 app.use(express.urlencoded({ extended: true }));
 

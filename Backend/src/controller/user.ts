@@ -8,7 +8,6 @@ import sendSuccessResponse from "../utills/sendSuccessResponse";
 import sendErrorResponse from "../utills/sendErrorResponse";
 
 const registerUser = async (req: Request, res: Response): Promise<void> => {
-
   const { name, email, password, phoneNumber } = req.body;
   try {
 
