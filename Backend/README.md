@@ -104,15 +104,19 @@ Method: `POST`
 
 
 
+### Success Response:
+
 ```json
 Success Response:{
     "success": true,
     "message": "User registered successfully",
-    "user": {
-        "name": "Aditya",
-        "email": "email@gmail.com",
-        "phoneNumber": "9304922632",
-        "isActive": true
+    "data": {
+        "user": {
+            "name": "John Doe",
+            "email": "john01.doe@example.com",
+            "phoneNumber": "9049226420",
+            "isActive": true
+        }
     }
 }
 ```
@@ -204,13 +208,18 @@ Method: `POST`
 
 &nbsp;
 
+### Success Response:
+
 ```json
 {
+    "success": true,
     "message": "Login successful",
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2N2Q2NzhlMGIxMWRiNWUxYjdiYjAyN2YiLCJpYXQiOjE3NDIxMDg5MzksImV4cCI6MTc0MjE5NTMzOX0._XZQZGqxD80tRMeehcn6ZHw24PluHjMiiJjh6XuhqGY",
-    "user": {
-        "id": "67d678e0b11db5e1b7bb027f",
-        "email": "john.doe@example.com"
+    "data": {
+        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2N2Q2NzhlMGIxMWRiNWUxYjdiYjAyN2YiLCJpYXQiOjE3NDIxMTE3MDgsImV4cCI6MTc0MjcxNjUwOH0.acIQN1yIg-_qmSxKAkmp-ENwDi63IVJ8tspKAoOyXbU",
+        "user": {
+            "id": "67d678e0b11db5e1b7bb027f",
+            "email": "john.doe@example.com"
+        }
     }
 }
 ```
