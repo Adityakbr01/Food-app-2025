@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { createUser } from "../controller/user";
-import { registerValidator, validate } from "../utills/Express-Validator";
+import { registerUser,loginUser } from "../controller/user";
+import { loginValidator, registerValidator, validate } from "../utills/Express-Validator";
 
 const userRouter = Router();
 
@@ -11,5 +11,6 @@ userRouter.get("/test", (req, res) => {
     });
 })
 
-userRouter.post("/register",registerValidator,validate,createUser)
+userRouter.post("/register",registerValidator,validate,registerUser)
+userRouter.post("/login",loginValidator,validate,loginUser)
 export default userRouter

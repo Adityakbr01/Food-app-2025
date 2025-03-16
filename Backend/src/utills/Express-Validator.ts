@@ -34,3 +34,17 @@ export const registerValidator = [
         .isMobilePhone("en-IN").withMessage("Please provide a valid phone number"),
     
 ];
+
+
+
+export const loginValidator = [
+    body("email")
+        .isEmail().withMessage("Please provide a valid email")
+        .normalizeEmail()
+        .notEmpty().withMessage("Email is required"),
+    body("password")
+        .notEmpty().withMessage("Password is required")
+        .isLength({ min: 6 }).withMessage("Password must be at least 6 characters")
+        .matches(/\d/).withMessage("Password must contain a number")
+        .matches(/[a-zA-Z]/).withMessage("Password must contain a letter"),
+];

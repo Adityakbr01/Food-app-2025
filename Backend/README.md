@@ -1,5 +1,35 @@
 # Backend
 
+
+### Endpoint: `/`
+
+**Method**: `GET`
+
+**Description**: This is a test endpoint to check root route is working.
+
+#### Success Response:
+
+```json
+{
+    "success": true,
+    "message": "Welcome to the FoodExpress API"
+}
+```
+
+#### error Response:
+
+```json
+{
+  "success": false,
+  "message": "Something went wrong"
+}
+```
+
+&nbsp;
+
+
+&nbsp;
+
 ## User Endpoints
 
 ### Endpoint: `/api/users/test`
@@ -25,7 +55,7 @@
   "message": "Something went wrong"
 }
 ```
-&nbsp;
+
 
 
 
@@ -44,10 +74,10 @@ Method: `POST`
 ## Request Body:
 ```json 
 {
-  "name": "John Doe",
-  "email": "john.doe@example.com",
+  "name": "Aditya",
+  "email": "email@gmail.com",
   "password": "password123",
-  "phoneNumber": "1234567890",
+  "phoneNumber": "9304922632",
 }
 ```
 
@@ -117,7 +147,7 @@ Success Response:{
 ```json
 {
   "success": false,
-  "message": "User with this email already exists."
+  "message": "User with this email or phone number already exists."
 }
 ```
 
@@ -130,6 +160,122 @@ Success Response:{
   "message": "Internal Server Error. Could not register the user."
 }
 ```
+
+&nbsp;
+
+
+
+&nbsp;
+
+
+&nbsp;
+
+
+
+
+### Endpoint: /api/users/login
+
+Method: `POST`
+
+**Description**: This endpoint is used to login a user. It accepts user details and checked in database
+
+## Request Body:
+```json 
+{
+  
+  "email": "john.doe@example.com",
+  "password": "password123",
+
+}
+```
+
+#### Validation Checks (Before login a user):
+
+
+
+1. **Email**: 
+   - Required.
+   - Must be a valid **email format** (e.g., `example@domain.com`).
+
+2. **Password**: 
+   - Required.
+   - Must be at least **6 characters** long.
+   - Must contain at least one **letter** and one **number**.
+
+&nbsp;
+
+```json
+{
+    "message": "Login successful",
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2N2Q2NzhlMGIxMWRiNWUxYjdiYjAyN2YiLCJpYXQiOjE3NDIxMDg5MzksImV4cCI6MTc0MjE5NTMzOX0._XZQZGqxD80tRMeehcn6ZHw24PluHjMiiJjh6XuhqGY",
+    "user": {
+        "id": "67d678e0b11db5e1b7bb027f",
+        "email": "john.doe@example.com"
+    }
+}
+```
+
+### Error Response:
+
+**If validation fails, you might receive the following error response with appropriate messages:**
+
+#### Example Response:
+
+```json
+{
+    "errors": [
+        {
+            "type": "field",
+            "value": "example.com",
+            "msg": "Please provide a valid email",
+            "path": "email",
+            "location": "body"
+        },
+        {
+            "type": "field",
+            "value": "password",
+            "msg": "Password must contain a number",
+            "path": "password",
+            "location": "body"
+        }
+    ]
+}
+```
+
+
+**Or if the user not found!** :
+
+```json
+{
+   "success": false,
+    "message": "User not found "
+   
+}
+```
+
+**Or if the provided password with the hashed password in the database not match** :
+
+```json
+{
+   "success": false,
+    "message": "Invalid credentials"
+   
+}
+```
+
+
+**If there's an internal error (e.g., MongoDB connection issues)** :
+```json
+
+{
+  "success": false,
+  "message": "Internal Server Error. Could not register the user."
+}
+```
+
+
+
+
 
 
 
