@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/componen
 import { Label } from "@/components/ui/label"
 import { Loader, Mail, Lock, Eye, EyeOff } from "lucide-react"
 import Link from "next/link"
+import { useLoginUserMutation } from "@/Redux/Slice/UserApiSlice"
 
 // Validation Schema
 const loginSchema = z.object({
@@ -36,26 +37,24 @@ export default function Login() {
   })
 
   // Submit Handler
+  const [loginUserMutation] = useLoginUserMutation(); // Extract the mutation function
+
   const onSubmit = async (data: LoginFormValues) => {
-    setIsLoading(true)
+    setIsLoading(true);
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500))
-
-      // In a real app, you would use your Redux mutation
-      // await loginUser(data).unwrap();
-
-      toast.success("Login successful! 🎉")
-      reset()
+      await loginUserMutation(data).unwrap(); // Call the mutation function correctly
+  
+      toast.success("Login successful! 🎉");
+      reset();
     } catch (err: any) {
-      console.log("Login Error:", err)
-
-      const errorMessage = err?.data?.message || "Login failed! ❌"
-      toast.error(errorMessage)
+      console.log("Login Error:", err);
+  
+      const errorMessage = err?.data?.message || "Login failed! ❌";
+      toast.error(errorMessage);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-950 px-4">

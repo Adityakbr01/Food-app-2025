@@ -3,7 +3,7 @@ import { RootUrl } from "@/utils/Constant";
 
 export const UserApiSlice = createApi({
   reducerPath: "api",
-  baseQuery: fetchBaseQuery({ baseUrl: `${RootUrl}/users` }), // ✅ Change this to your API
+  baseQuery: fetchBaseQuery({ baseUrl: `${RootUrl}/users`,credentials: "include" }), // ✅ Change this to your API
   endpoints: (builder) => ({
     test: builder.query({
       query: () => "/test",
@@ -15,7 +15,14 @@ export const UserApiSlice = createApi({
         body: userData,
       }),
     }),
+    loginUser: builder.mutation({
+      query: (userData) => ({
+        url: "/login",
+        method: "POST",
+        body: userData,
+      }),
+    }),
   }),
 });
 
-export const { useTestQuery, useRegisterUserMutation } = UserApiSlice;
+export const { useTestQuery, useRegisterUserMutation,useLoginUserMutation } = UserApiSlice;
