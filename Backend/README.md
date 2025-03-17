@@ -289,4 +289,113 @@ Method: `POST`
 
 
 
+&nbsp;
+
+
+
+&nbsp;
+
+
+&nbsp;
+
+
+## Endpoint: /api/users/profile
+
+Method: `GET`
+
+**Description**: This endpoint is used to featch a user. in database
+
+
+## Request Body:
+```json 
+{
+    "req.body?.token" || "Authorization bearer token"
+   
+}
+```
+koi bhi ek hona chahiye Request Body || Request cookie
+
+## Request cookie:
+```json 
+{
+    "cookies?.token"
+   
+}
+```
+
+### Success Response:
+
+```json
+{
+    "success": true,
+    "message": "User profile fetched successfully",
+    "data": {
+        "user": {
+            "_id": "67d678e0b11db5e1b7bb027f",
+            "name": "John Doe",
+            "email": "john.doe@example.com",
+            "phoneNumber": "9049226320",
+            "emailVerified": false,
+            "orders": [],
+            "favourites": [],
+            "paymentMethods": [],
+            "deliveryAddresses": [],
+            "role": "customer",
+            "isActive": true,
+            "ratings": [],
+            "createdAt": "2025-03-16T07:08:16.755Z",
+            "updatedAt": "2025-03-16T07:08:16.755Z",
+            "__v": 0,
+            "bio":"Passionate about food and adventure, always exploring new flavors and culinary experiences."
+            
+        }
+    }
+}
+```
+
+### Error Response:
+
+**If validation fails, you might receive the following error response with appropriate messages:**
+
+#### Example Response:
+
+```json
+{
+    
+    "success": false,
+    "message": "Access denied. No token provided",
+     "code" : 401
+}
+```
+
+
+**Or if the user not found!** :
+
+```json
+{
+   "success": false,
+    "message": "User not found ",
+    "code" : 404
+   
+}
+```
+
+
+
+**If there's an internal error (e.g., MongoDB connection issues)** :
+```json
+{
+  "success": false,
+  "message": "Internal Server Error. Could not register the user.",
+  "code" : 500
+}
+```
+
+
+
+
+
+
+
+
 

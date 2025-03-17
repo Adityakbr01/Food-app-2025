@@ -6,6 +6,7 @@ import jwt from "jsonwebtoken"
 import { _config } from "../utills/Config";
 import sendSuccessResponse from "../utills/sendSuccessResponse";
 import sendErrorResponse from "../utills/sendErrorResponse";
+import type { AuthRequest } from "../middleware/userAuthMiddleware";
 
 const registerUser = async (req: Request, res: Response): Promise<void> => {
   const { name, email, password, phoneNumber } = req.body;
@@ -79,4 +80,24 @@ const loginUser = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-export { registerUser, loginUser };
+
+const getUserProfile = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    if (!req.userId) {
+      sendErrorResponse(res, 401, "Unauthorized");
+      return;
+    }
+    const user = await User.findById(req.userId).select("-password");
+    if (!user) {
+      sendErrorResponse(res, 404, "User not found");
+      return;
+    }
+
+    sendSuccessResponse(res, 200, "User profile fetched successfully", { user });
+  } catch (error) {
+    console.error(error);
+    sendErrorResponse(res, 500, "Internal Server Error");
+  }
+};
+
+export { registerUser, loginUser,getUserProfile };

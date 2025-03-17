@@ -8,14 +8,15 @@ import { connectDB, gracefulShutdown } from "./db/DBConnection";
 import { _config } from "./utills/Config";
 import { logger } from "./utills/logger";
 import userRouter from "./routes/users";
+import cookieParser from "cookie-parser";
 
 // Load environment variables
 dotenv.config();
 
 const app = express();
-
 // Middleware Setup
 app.use(compression());
+app.use(cookieParser());
 app.use(cors({
   origin: ["http://localhost:5000", "http://localhost:3000"]
 }));

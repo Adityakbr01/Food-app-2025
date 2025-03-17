@@ -27,6 +27,7 @@ export interface IUser extends Document {
     isActive: boolean;
     createdAt: Date;
     updatedAt: Date;
+    bio?: string;
 }
 
 
@@ -56,6 +57,7 @@ const userSchema = new mongoose.Schema<IUser>({
     isActive: { type: Boolean, default: true },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
+    bio: { type: String,default:"Passionate about food and adventure, always exploring new flavors and culinary experiences." },
 });
 
 
