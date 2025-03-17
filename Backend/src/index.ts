@@ -18,7 +18,9 @@ const app = express();
 app.use(compression());
 app.use(cookieParser());
 app.use(cors({
-  origin: ["http://localhost:5000", "http://localhost:3000"]
+  origin: ["http://localhost:5000", "http://localhost:3000"],
+  credentials: true
+
 }));
 
 app.use(express.json({ limit: "50kb", strict: true }));
