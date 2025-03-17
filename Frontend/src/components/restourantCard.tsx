@@ -16,8 +16,8 @@ interface RestaurantCardProps {
   deliveryTime: string
   deliveryFee: number
   distance: string
-  id: string
-  location: string
+  id?: string
+  location?: string
 }
 
 export function RestaurantCard({
