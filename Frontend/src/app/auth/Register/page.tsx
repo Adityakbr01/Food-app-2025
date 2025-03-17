@@ -7,10 +7,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Loader, Mail, Lock, User, Phone, Eye, EyeOff } from "lucide-react";
 import { z } from "zod";
+import Link from "next/link";
 
 // ✅ **Validation Schema**
 const registerSchema = z.object({
@@ -142,6 +143,14 @@ export default function Register() {
             </Button>
           </form>
         </CardContent>
+        <CardFooter className="flex justify-center">
+          <p className="text-gray-400">
+            Already have an account?{" "}
+            <Link href="/auth/Login" className="text-blue-400 hover:text-blue-300">
+              Login
+            </Link>
+          </p>
+        </CardFooter>
       </Card>
     </div>
   );

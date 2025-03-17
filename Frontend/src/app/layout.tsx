@@ -6,6 +6,7 @@ import "./globals.css"
 import { ThemeProvider } from "next-themes"
 import Providers from "@/components/Providers"
 import { Toaster } from "@/components/ui/sonner"
+import { MobileNavbar } from "@/components/Mobile-navBar"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -33,6 +34,7 @@ export default function RootLayout({
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <Providers>
             {children}
+             <MobileNavbar />
             <Toaster />
           </Providers>
         </ThemeProvider>

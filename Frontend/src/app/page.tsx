@@ -18,7 +18,7 @@ import { TestimonialCarousel } from "@/components/TestimonialCarousel"
 import { BlogPostCard } from "@/components/BlogPostCard"
 import RecomendedItemCard from "@/components/recomendedItemCard"
 
-const ITEMS_PER_PAGE = 4; // Number of products per page
+const ITEMS_PER_PAGE = 4; 
 
 
 
@@ -116,8 +116,8 @@ export default function Home() {
               <MapPin className="mr-2 h-4 w-4" />
               <span>Set Location</span>
             </Button>
-            <Button variant="ghost">Sign In</Button>
-            <Button>Sign Up</Button>
+            <Link href={"auth/Register"}>  <Button className="cursor-pointer" variant="ghost">Register</Button> </Link>
+            <Link href={"auth/Login"}><Button className="cursor-pointer">Login</Button></Link>
           </div>
           <Button variant="ghost" size="icon" className="md:hidden" asChild>
             <Link href="/search">
@@ -403,7 +403,6 @@ export default function Home() {
         </motion.section>
         <NewsletterSection />
       </main>
-      <MobileNavbar />
       <Footer />
     </div>
   );
