@@ -1,9 +1,12 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { RootUrl } from "@/utils/Constant";
+import { get } from "http";
+import { setUser } from "./data/userSlice";
 
 export const UserApiSlice = createApi({
   reducerPath: "api",
   baseQuery: fetchBaseQuery({ baseUrl: `${RootUrl}/users`,credentials: "include" }), // ✅ Change this to your API
+  tagTypes: ["User"],
   endpoints: (builder) => ({
     test: builder.query({
       query: () => "/test",
@@ -14,6 +17,7 @@ export const UserApiSlice = createApi({
         method: "POST",
         body: userData,
       }),
+      invalidatesTags: ["User"],
     }),
     loginUser: builder.mutation({
       query: (userData) => ({
@@ -21,8 +25,24 @@ export const UserApiSlice = createApi({
         method: "POST",
         body: userData,
       }),
+      invalidatesTags: ["User"],
+    }),
+    getUserProfile: builder.query({
+      query: () => ({
+        url: "/profile",
+        method: "GET",
+      }),
+      providesTags: ["User"],
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled; // API response ka data
+          dispatch(setUser(data)); // Redux store me user set karna
+        } catch (error) {
+          console.error("Error fetching user profile:", error);
+        }
+      },
     }),
   }),
 });
 
-export const { useTestQuery, useRegisterUserMutation,useLoginUserMutation } = UserApiSlice;
+export const { useTestQuery, useRegisterUserMutation,useLoginUserMutation,useGetUserProfileQuery } = UserApiSlice;
