@@ -12,7 +12,7 @@ The app is built using the following technologies:
   - A state management tool to handle complex state logic across the application, providing a predictable state container.
 2. **CSS3/Sass/teilwin css/shadcn ui** :
   - For styling the components with responsive layouts, animations, and custom themes.
-3. **Axios** :
+3. **rtkQuery** :
   - For making HTTP requests to the backend API to fetch data, such as menus, orders, and user details.
 ### Backend:
 1. Node.js: A JavaScript runtime used for building the server-side application, handling requests, and processing data.
