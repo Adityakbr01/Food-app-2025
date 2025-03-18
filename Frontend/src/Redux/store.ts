@@ -14,14 +14,13 @@ const initialiseApp = async () => {
     const result = await store.dispatch(
       UserApiSlice.endpoints.getUserProfile.initiate({}, { forceRefetch: true })
     ).unwrap();
-    
-    console.log("User profile fetched successfully:", result);
   } catch (error) {
     console.error("Failed to fetch user profile:", error);
   }
 };
 
 initialiseApp();
+
 
 
 // Optional: Auto-refetch listeners

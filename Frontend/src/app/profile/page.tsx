@@ -21,6 +21,10 @@ import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { useToast } from "@/hooks/use-toast"
 import { MobileNavbar } from "@/components/Mobile-navBar"
+import { useSelector } from "react-redux"
+import { RootState } from "@/Redux/store"
+
+
 
 // Form validation schema
 const profileFormSchema = z.object({
@@ -40,16 +44,49 @@ const profileFormSchema = z.object({
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>
 
-// Mock user data
-const defaultValues: ProfileFormValues = {
-  username: "Rahul Sharma",
-  email: "rahul.sharma@example.com",
-  bio: "Food enthusiast and explorer. Always on the lookout for new culinary experiences.",
-  phone: "+91 9876543210",
-  address: "123 Main Street, Apartment 4B, Mumbai, Maharashtra, 400001",
+
+
+interface User {
+  bio?: string;
+  _id?: string;
+  name?: string;
+  email?: string;
+  phoneNumber?: string;
+  role?: string;
+  deliveryAddresses?: any[];
+  isActive?: boolean;
 }
 
+
 export default function ProfilePage() {
+
+
+
+  const { user } = useSelector((state: RootState) => state.auth) as { user: User | null };
+
+  const {
+    bio,
+    _id,
+    name,
+    email,
+    phoneNumber,
+    role,
+    deliveryAddresses,
+    isActive
+  } = user || {};
+
+  console.log(user);
+
+// Mock user data
+const defaultValues: ProfileFormValues = {
+  username: name || "Rahul Sharma",
+  email: email || "rahul.sharma@example.com",
+  bio: bio,
+  phone: phoneNumber,
+  address: deliveryAddresses?.[0]?.address,
+}
+
+
   const { toast } = useToast()
   const [isEditing, setIsEditing] = useState(false)
   const [profileImage, setProfileImage] = useState<string | null>(
@@ -253,11 +290,11 @@ export default function ProfilePage() {
                   </Form>
                 </CardContent>
                 <CardFooter className="flex justify-between">
-                  <Button variant="outline" onClick={handleCancel}>
+                  <Button className="cursor-pointer" variant="outline" onClick={handleCancel}>
                     <X className="mr-2 h-4 w-4" />
                     Cancel
                   </Button>
-                  <Button onClick={form.handleSubmit(onSubmit)}>
+                  <Button className="cursor-pointer" onClick={form.handleSubmit(onSubmit)}>
                     <Save className="mr-2 h-4 w-4" />
                     Save changes
                   </Button>
@@ -287,8 +324,8 @@ export default function ProfilePage() {
                     />
                   </div>
                 </motion.div>
-                <h2 className="text-2xl font-bold mt-4">{defaultValues.username}</h2>
-                <p className="text-muted-foreground text-center max-w-md mt-2">{defaultValues.bio}</p>
+                <h2 className="text-2xl font-bold mt-4">{name}</h2>
+                <p className="text-muted-foreground text-center max-w-md mt-2">{bio}</p>
               </div>
 
               <Tabs defaultValue="profile" className="w-full">
@@ -308,7 +345,7 @@ export default function ProfilePage() {
                         <User className="h-5 w-5 text-muted-foreground" />
                         <div>
                           <p className="text-sm font-medium">Name</p>
-                          <p className="text-sm text-muted-foreground">{defaultValues.username}</p>
+                          <p className="text-sm text-muted-foreground">{name}</p>
                         </div>
                       </div>
                       <Separator />
@@ -316,7 +353,7 @@ export default function ProfilePage() {
                         <Mail className="h-5 w-5 text-muted-foreground" />
                         <div>
                           <p className="text-sm font-medium">Email</p>
-                          <p className="text-sm text-muted-foreground">{defaultValues.email}</p>
+                          <p className="text-sm text-muted-foreground">{email}</p>
                         </div>
                       </div>
                       <Separator />
@@ -324,17 +361,19 @@ export default function ProfilePage() {
                         <Phone className="h-5 w-5 text-muted-foreground" />
                         <div>
                           <p className="text-sm font-medium">Phone</p>
-                          <p className="text-sm text-muted-foreground">{defaultValues.phone}</p>
+                          <p className="text-sm text-muted-foreground">{phoneNumber}</p>
                         </div>
                       </div>
                       <Separator />
-                      <div className="flex items-start gap-3">
-                        <MapPin className="h-5 w-5 text-muted-foreground mt-0.5" />
-                        <div>
-                          <p className="text-sm font-medium">Address</p>
-                          <p className="text-sm text-muted-foreground">{defaultValues.address}</p>
+                      {deliveryAddresses && deliveryAddresses.length > 0 && (
+                        <div className="flex items-start gap-3">
+                          <MapPin className="h-5 w-5 text-muted-foreground mt-0.5" />
+                          <div>
+                            <p className="text-sm font-medium">Address</p>
+                            <p className="text-sm text-muted-foreground">{defaultValues.address}</p>
+                          </div>
                         </div>
-                      </div>
+                      )}
                     </CardContent>
                     <CardFooter>
                       <Button variant="outline" className="w-full" onClick={() => setIsEditing(true)}>
@@ -366,7 +405,8 @@ export default function ProfilePage() {
                       <CardTitle>Saved Addresses</CardTitle>
                       <CardDescription>Manage your delivery addresses</CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-4">
+                    {deliveryAddresses && deliveryAddresses.length > 0 ? (
+                      <CardContent className="space-y-4">
                       <div className="border rounded-lg p-4">
                         <div className="flex justify-between items-start mb-2">
                           <div>
@@ -387,6 +427,14 @@ export default function ProfilePage() {
                         Add New Address
                       </Button>
                     </CardContent>
+                    ):<CardContent>
+                      <div className="text-center py-8">
+                        <p className="text-muted-foreground">You have no saved addresses</p>
+                        <Button className="mt-4 cursor-pointer" onClick={() => setIsEditing(true)}>
+                          Add New Address
+                        </Button>
+                      </div>
+                      </CardContent>}
                   </Card>
                 </TabsContent>
               </Tabs>

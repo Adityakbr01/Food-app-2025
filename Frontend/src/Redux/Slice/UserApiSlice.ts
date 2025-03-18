@@ -36,7 +36,8 @@ export const UserApiSlice = createApi({
       async onQueryStarted(_, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled; // API response ka data
-          dispatch(setUser(data)); // Redux store me user set karna
+          console.log(data.data);
+          dispatch(setUser(data.data.user)); // Redux store me user set karna
         } catch (error) {
           console.error("Error fetching user profile:", error);
         }
