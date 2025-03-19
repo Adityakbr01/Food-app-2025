@@ -43,7 +43,15 @@ export const UserApiSlice = createApi({
         }
       },
     }),
+    updateUserProfile: builder.mutation({
+      query: (userData) => ({
+        url: "/profile",
+        method: "PUT",
+        body: userData,
+      }),
+      invalidatesTags: ["User"],
+    })
   }),
 });
 
-export const { useTestQuery, useRegisterUserMutation,useLoginUserMutation,useGetUserProfileQuery } = UserApiSlice;
+export const { useTestQuery, useRegisterUserMutation,useLoginUserMutation,useGetUserProfileQuery,useUpdateUserProfileMutation } = UserApiSlice;

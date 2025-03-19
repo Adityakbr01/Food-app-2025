@@ -8,7 +8,7 @@ import Image from "next/image"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { motion } from "framer-motion"
-import { ArrowLeft, Camera, Edit2, LogOut, MapPin, Phone, Save, User, X, Mail, Plus } from "lucide-react"
+import { ArrowLeft, Camera, Edit2, LogOut, MapPin, Phone, Save, User, X, Mail, Plus, Loader2, Loader } from "lucide-react"
 import * as z from "zod"
 
 import { Button } from "@/components/ui/button"
@@ -19,12 +19,20 @@ import { Separator } from "@/components/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
-import { useToast } from "@/hooks/use-toast"
+// import { useToast } from "@/hooks/use-toast"
 import { MobileNavbar } from "@/components/Mobile-navBar"
 import { useSelector } from "react-redux"
 import { RootState } from "@/Redux/store"
+import { useUpdateUserProfileMutation } from "@/Redux/Slice/UserApiSlice"
+import { toast } from "sonner"
 
 
+const addressSchema = z.object({
+  street: z.string().optional(),
+  city: z.string().optional(),
+  state: z.string().optional(),
+  zipCode: z.string().optional(),
+});
 
 // Form validation schema
 const profileFormSchema = z.object({
@@ -39,7 +47,7 @@ const profileFormSchema = z.object({
     .min(10, { message: "Phone number must be at least 10 digits" })
     .max(15, { message: "Phone number must not be longer than 15 digits" })
     .optional(),
-  address: z.string().min(5, { message: "Address must be at least 5 characters" }).optional(),
+  address: addressSchema.optional(),
 })
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>
@@ -55,14 +63,22 @@ interface User {
   role?: string;
   deliveryAddresses?: any[];
   isActive?: boolean;
+  profileImage: {
+    url: string;
+  }
+  address: {
+    street: string;
+    city: string;
+    state: string;
+    zipCode: string;
+  }
 }
 
 
 export default function ProfilePage() {
-
-
-
   const { user } = useSelector((state: RootState) => state.auth) as { user: User | null };
+  const [errors, seterrors] = useState<string | null>(null)
+  const [updateUserProfile, { isLoading, isSuccess, error }] = useUpdateUserProfileMutation()
 
   const {
     bio,
@@ -72,27 +88,35 @@ export default function ProfilePage() {
     phoneNumber,
     role,
     deliveryAddresses,
-    isActive
+    isActive,
+    profileImage,
+    address
+
   } = user || {};
 
-  console.log(user);
 
-// Mock user data
-const defaultValues: ProfileFormValues = {
-  username: name || "Rahul Sharma",
-  email: email || "rahul.sharma@example.com",
-  bio: bio,
-  phone: phoneNumber,
-  address: deliveryAddresses?.[0]?.address,
-}
+  // Mock user data
+  const defaultValues: ProfileFormValues = {
+    username: name || "Rahul Sharma",
+    email: email || "rahul.sharma@example.com",
+    bio: bio,
+    phone: phoneNumber,
+    address: {
+      street: address?.street || "",
+      city: address?.city || "",
+      state: address?.state || "",
+      zipCode: address?.zipCode || "",
+    },
+
+  }
 
 
-  const { toast } = useToast()
+  // const { toast } = useToast()
   const [isEditing, setIsEditing] = useState(false)
-  const [profileImage, setProfileImage] = useState<string | null>(
+  const [profileImages, setProfileImage] = useState<string | null>(
     "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fHBvcnRyYWl0fGVufDB8fDB8fHww",
   )
-  const [imagePreview, setImagePreview] = useState<string | null>(profileImage)
+  const [imagePreview, setImagePreview] = useState<string | null>(profileImage?.url!)
 
   // Initialize form
   const form = useForm<ProfileFormValues>({
@@ -104,6 +128,11 @@ const defaultValues: ProfileFormValues = {
   // Handle profile image change
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
+    const maxSize = 2 * 1024 * 1024; // 2MB limit
+    if (file && file.size > maxSize) {
+      toast.error("File size is too large! Max allowed size is 2MB.");
+      return;
+    }
     if (file) {
       const reader = new FileReader()
       reader.onloadend = () => {
@@ -114,29 +143,51 @@ const defaultValues: ProfileFormValues = {
   }
 
   // Handle form submission
-  const onSubmit = (data: ProfileFormValues) => {
-    // In a real app, you would send this data to your backend
-    console.log(data)
-
-    // Update profile image if changed
-    if (imagePreview !== profileImage) {
-      setProfileImage(imagePreview)
+  const onSubmit = async (data: ProfileFormValues) => {
+    const formData = new FormData();
+  
+    // Append text fields to FormData
+    formData.append("username", data.username);
+    formData.append("email", data.email);
+    formData.append("bio", data.bio || "");
+    formData.append("phone", data.phone || "");
+  
+    // Append address fields to FormData
+    if (data.address) {
+      formData.append("address", JSON.stringify(data.address));
     }
-
-    // Show success message
-    toast({
-      title: "Profile updated",
-      description: "Your profile has been updated successfully.",
-    })
-
-    // Exit edit mode
-    setIsEditing(false)
-  }
-
+  
+    // Append profile image if selected
+    const fileInput = document.querySelector<HTMLInputElement>("#profileImageInput");
+     console.log(fileInput)
+    if (fileInput?.files?.[0]) {
+      formData.append("profileImage", fileInput.files[0]); 
+    }
+  
+    for (let [key, value] of formData.entries()) {
+      console.log(`${key}:`, value);
+    }
+  
+    // Send FormData to API
+    const updated_user = await updateUserProfile(formData);
+    
+    if (updated_user.error) {
+      updated_user.error.data?.errors.forEach((err: any) => {
+        toast.error(err.msg);
+      });
+      return;
+    }
+  
+    // Update UI after successful update
+    toast.success(updated_user.data.message || "Profile updated successfully!");
+    setProfileImage(imagePreview);
+    setIsEditing(false);
+  };
+  
   // Cancel editing
   const handleCancel = () => {
     form.reset()
-    setImagePreview(profileImage)
+    setImagePreview(profileImage?.url!)
     setIsEditing(false)
   }
 
@@ -179,6 +230,7 @@ const defaultValues: ProfileFormValues = {
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                       <div className="flex flex-col items-center mb-6">
                         <div className="relative">
+                        
                           <div className="h-24 w-24 rounded-full overflow-hidden border-4 border-background shadow-md">
                             <Image
                               src={imagePreview || "/placeholder.svg"}
@@ -189,14 +241,14 @@ const defaultValues: ProfileFormValues = {
                             />
                           </div>
                           <label
-                            htmlFor="profile-image"
+                            htmlFor="profileImageInput"
                             className="absolute bottom-0 right-0 bg-rose-500 text-white p-1.5 rounded-full cursor-pointer shadow-md hover:bg-rose-600 transition-colors"
                           >
                             <Camera className="h-4 w-4" />
                             <span className="sr-only">Change profile picture</span>
                           </label>
                           <input
-                            id="profile-image"
+                            id="profileImageInput"
                             type="file"
                             accept="image/*"
                             className="hidden"
@@ -223,19 +275,6 @@ const defaultValues: ProfileFormValues = {
                           )}
                         />
 
-                        <FormField
-                          control={form.control}
-                          name="email"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Email</FormLabel>
-                              <FormControl>
-                                <Input placeholder="Your email" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
 
                         <FormField
                           control={form.control}
@@ -253,19 +292,61 @@ const defaultValues: ProfileFormValues = {
 
                         <FormField
                           control={form.control}
-                          name="address"
+                          name="address.street"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Address</FormLabel>
+                              <FormLabel>Street</FormLabel>
                               <FormControl>
-                                <Input placeholder="Your address" {...field} />
+                                <Input placeholder="Street Address" {...field} />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
                           )}
                         />
-                      </div>
 
+                        <FormField
+                          control={form.control}
+                          name="address.city"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>City</FormLabel>
+                              <FormControl>
+                                <Input placeholder="City" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name="address.state"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>State</FormLabel>
+                              <FormControl>
+                                <Input placeholder="State" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name="address.zipCode"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Zip Code</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Zip Code" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                      </div>
                       <FormField
                         control={form.control}
                         name="bio"
@@ -296,7 +377,8 @@ const defaultValues: ProfileFormValues = {
                   </Button>
                   <Button className="cursor-pointer" onClick={form.handleSubmit(onSubmit)}>
                     <Save className="mr-2 h-4 w-4" />
-                    Save changes
+                    {isLoading ? <>
+                      <Loader className="mr-2 h-4 w-4 animate-spin" /></> : "Save changes"}
                   </Button>
                 </CardFooter>
               </Card>
@@ -316,7 +398,7 @@ const defaultValues: ProfileFormValues = {
                 >
                   <div className="h-32 w-32 rounded-full overflow-hidden border-4 border-white shadow-lg">
                     <Image
-                      src={profileImage || "/placeholder.svg"}
+                      src={profileImage?.url || "/placeholder.svg"}
                       alt="Profile"
                       width={128}
                       height={128}
@@ -365,12 +447,13 @@ const defaultValues: ProfileFormValues = {
                         </div>
                       </div>
                       <Separator />
-                      {deliveryAddresses && deliveryAddresses.length > 0 && (
+                      {address && (
                         <div className="flex items-start gap-3">
                           <MapPin className="h-5 w-5 text-muted-foreground mt-0.5" />
                           <div>
                             <p className="text-sm font-medium">Address</p>
-                            <p className="text-sm text-muted-foreground">{defaultValues.address}</p>
+                            <p className="text-sm text-muted-foreground">{address.city}</p>
+
                           </div>
                         </div>
                       )}
@@ -405,36 +488,39 @@ const defaultValues: ProfileFormValues = {
                       <CardTitle>Saved Addresses</CardTitle>
                       <CardDescription>Manage your delivery addresses</CardDescription>
                     </CardHeader>
-                    {deliveryAddresses && deliveryAddresses.length > 0 ? (
+                    {address ? (
                       <CardContent className="space-y-4">
-                      <div className="border rounded-lg p-4">
-                        <div className="flex justify-between items-start mb-2">
-                          <div>
-                            <p className="font-medium">Home</p>
-                            <p className="text-sm text-muted-foreground">{defaultValues.address}</p>
+                        <div className="border rounded-lg p-4">
+                          <div className="flex justify-between items-start mb-2">
+                            <div>
+                              <p className="font-medium">Home</p>
+                              <p className="text-sm text-muted-foreground">{address?.city}</p>
+                              <p className="text-sm text-muted-foreground">{address?.street}</p>
+                              <p className="text-sm text-muted-foreground">{address?.state}</p>
+                              <p className="text-sm text-muted-foreground">{address?.zipCode}</p>
+                            </div>
+                            <Button variant="ghost" size="sm">
+                              <Edit2 className="h-4 w-4" />
+                            </Button>
                           </div>
-                          <Button variant="ghost" size="sm">
-                            <Edit2 className="h-4 w-4" />
-                          </Button>
+                          <div className="flex items-center gap-2 mt-2">
+                            <Badge className="bg-rose-100 text-rose-700 hover:bg-rose-100">Default</Badge>
+                            <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-100">Home</Badge>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-2 mt-2">
-                          <Badge className="bg-rose-100 text-rose-700 hover:bg-rose-100">Default</Badge>
-                          <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-100">Home</Badge>
-                        </div>
-                      </div>
-                      <Button variant="outline" className="w-full">
-                        <Plus className="mr-2 h-4 w-4" />
-                        Add New Address
-                      </Button>
-                    </CardContent>
-                    ):<CardContent>
+                        <Button variant="outline" className="w-full">
+                          <Plus className="mr-2 h-4 w-4" />
+                          Add New Address
+                        </Button>
+                      </CardContent>
+                    ) : <CardContent>
                       <div className="text-center py-8">
                         <p className="text-muted-foreground">You have no saved addresses</p>
                         <Button className="mt-4 cursor-pointer" onClick={() => setIsEditing(true)}>
                           Add New Address
                         </Button>
                       </div>
-                      </CardContent>}
+                    </CardContent>}
                   </Card>
                 </TabsContent>
               </Tabs>
