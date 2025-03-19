@@ -102,6 +102,8 @@ const getUserProfile = async (req: AuthRequest, res: Response): Promise<void> =>
 };
 
  const updateUserProfile = async (req: AuthRequest, res: Response) => {
+  
+  console.log(req.body);
   try {
     const userId = req.userId;
     if (!userId) {
@@ -113,8 +115,9 @@ const getUserProfile = async (req: AuthRequest, res: Response): Promise<void> =>
       return sendErrorResponse(res, 404, "User not found");
     }
 
-    const { name, phoneNumber, bio, address } = req.body;
-    let updatedFields: any = { name, phoneNumber, bio, address };
+    const { userName, phoneNumber, bio, address } = req.body;
+    console.log(req.body);
+    let updatedFields: any = { userName, phoneNumber, bio, address };
 
     let profileImage = user.profileImage;
 
@@ -134,15 +137,15 @@ const getUserProfile = async (req: AuthRequest, res: Response): Promise<void> =>
         publicId: uploadedImage.public_id,
       };
     }
-
      
     }
+  
 
     const updatedUser = await User.findByIdAndUpdate(
       req.userId,
       {
-        name: req.body.name || user.name,
-        phoneNumber: req.body.phoneNumber || user.phoneNumber,
+        name: req.body.username || user.name,
+        phoneNumber: req.body.phone || user.phoneNumber,
         bio: req.body.bio || user.bio,
         address: req.body.address || user.address,
         profileImage,
@@ -156,7 +159,5 @@ const getUserProfile = async (req: AuthRequest, res: Response): Promise<void> =>
     return sendErrorResponse(res, 500, "Internal Server Error");
   }
 };
-
-
 
 export { registerUser, loginUser,getUserProfile,updateUserProfile };

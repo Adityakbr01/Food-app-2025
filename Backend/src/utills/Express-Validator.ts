@@ -47,8 +47,6 @@ export const loginValidator = [
         .matches(/[a-zA-Z]/).withMessage("Password must contain a letter"),
 ];
 
-
-
 export const updateUserValidator = [
     body("name")
         .optional()
@@ -60,7 +58,7 @@ export const updateUserValidator = [
         .isString().withMessage("Bio must be a string")
         .isLength({ min: 12 }).withMessage("Bio must be at least 12 characters"),
 
-    body("phoneNumber")
+    body("phone")
         .optional()
         .isMobilePhone("en-IN").withMessage("Please provide a valid phone number"),
 
