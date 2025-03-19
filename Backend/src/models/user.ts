@@ -22,7 +22,10 @@ export interface IUser extends Document {
     deliveryAddresses: string[];
     preferredPaymentMethod: string;
     ratings: [{ restaurant: mongoose.Types.ObjectId; rating: number; comment: string }];
-    profileImage?: string;
+    profileImage?: {
+        url: { type: string },
+        publicId: { type: string },
+      },
     role: 'customer' | 'admin' | 'restaurant_owner' | 'delivery_boy';
     isActive: boolean;
     createdAt: Date;
@@ -52,7 +55,11 @@ const userSchema = new mongoose.Schema<IUser>({
     deliveryAddresses: [{ type: String }], // Array of delivery address identifiers
     preferredPaymentMethod: { type: String },
     ratings: [{ restaurant: { type: mongoose.Schema.Types.ObjectId, ref: 'Restaurant' }, rating: { type: Number }, comment: { type: String } }],
-    profileImage: { type: String },
+    profileImage: {
+        url: { type: String },
+        publicId: { type: String },
+  
+    },
     role: { type: String, enum: ['customer', 'admin', 'restaurant_owner', 'delivery_boy'], default: 'customer' },
     isActive: { type: Boolean, default: true },
     createdAt: { type: Date, default: Date.now },

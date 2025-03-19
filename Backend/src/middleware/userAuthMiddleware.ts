@@ -22,7 +22,6 @@ export const authenticateUser = (
     req.cookies?.token || // Cookie se
     req.body?.token; // Body se
 
-    console.log(token);
   if (!token) {
     sendErrorResponse(res, 401, "Access denied. No token provided");
     return; 

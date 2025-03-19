@@ -395,6 +395,205 @@ koi bhi ek hona chahiye Request Body || Request cookie
 
 
 
+&nbsp;
+
+
+
+&nbsp;
+
+
+&nbsp;
+
+
+## Endpoint: /api/users/profile
+
+Method: `PUT`
+
+**Description**: This endpoint is used to update a user data. in database
+
+
+## Auth Request Body:
+```json 
+{
+    "req.body?.token" || "Authorization bearer token"
+   
+}
+```
+koi bhi ek hona chahiye Request Body || Request cookie
+
+## Auth Request cookie:
+```json 
+{
+    "cookies?.token"
+   
+}
+```
+
+## Request Body:
+```json 
+{
+    {
+  "name": "Aman Bhai",
+  "bio": "Passionate about food and adventure, always exploring new flavors and culinary experiences.",
+  "phoneNumber": "9049226340",
+  "address": {
+    "street": "45B, MG Road",
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "zipCode": "400001"
+  }
+    }
+}
+
+"profileImage" : "File (Image)"	
+"profileImageType" : "✅ Must be an image file (JPG, PNG, or JPEG)"
+
+```
+
+### Success Response:
+
+```json
+{
+    "success": true,
+    "message": "User profile updated successfully",
+    "data": {
+        "user": {
+            "address": {
+                "street": "45B, MG Road",
+                "city": "Mumbai",
+                "state": "Maharashtra",
+                "zipCode": "400001"
+            },
+            "profileImage": {
+                "url": "https://res.cloudinary.com/dxsbdrwew/image/upload/v1742397016/user_profiles/lbq6evuw46jrrhvmj9hc.jpg",
+                "publicId": "user_profiles/lbq6evuw46jrrhvmj9hc"
+            },
+            "_id": "67d678e0b11db5e1b7bb027f",
+            "name": "Aman bhai",
+            "email": "john.doe@example.com",
+            "phoneNumber": "9049226340",
+            "emailVerified": false,
+            "orders": [],
+            "favourites": [],
+            "paymentMethods": [],
+            "deliveryAddresses": [],
+            "role": "customer",
+            "isActive": true,
+            "ratings": [],
+            "createdAt": "2025-03-16T07:08:16.755Z",
+            "updatedAt": "2025-03-16T07:08:16.755Z",
+            "__v": 0,
+            "bio": "Passionate about food and adventure, always exploring new flavors and culinary experiences"
+        }
+    }
+}
+```
+
+### Error Response:
+
+**If validation fails, you might receive the following error response with appropriate messages:**
+
+#### Example Response:
+
+```json
+{
+    
+    "success": false,
+    "message": "Access denied. No token provided",
+     "code" : 401
+}
+```
+
+
+
+**Or if the user input wrong** :
+
+## Response Body :
+```json 
+{
+    "errors": [
+        {
+            "type": "field",
+            "value": "Am",
+            "msg": "Name must be at least 3 characters",
+            "path": "name",
+            "location": "body"
+        },
+        {
+            "type": "field",
+            "value": "Pas",
+            "msg": "Bio must be at least 12 characters",
+            "path": "bio",
+            "location": "body"
+        },
+        {
+            "type": "field",
+            "value": "90492263407",
+            "msg": "Please provide a valid phone number",
+            "path": "phoneNumber",
+            "location": "body"
+        },
+        {
+            "type": "field",
+            "value": "40000000",
+            "msg": "Please provide a valid zip code",
+            "path": "address.zipCode",
+            "location": "body"
+        }
+    ]
+}
+```
+**Or if the user not found!** :
+
+```json
+{
+   "success": false,
+    "message": "User not found ",
+    "code" : 404
+   
+}
+```
+
+**Image Error** :
+
+``` json
+ {
+    "Missing Image (400)" : {
+  "success": false,
+  "message": "Missing required parameter - profileImage"
+},
+"Invalid File Type (400)" : {
+    {
+  "success": false,
+  "message": "profileImage must be a valid image file (JPEG, JPG, PNG)"
+}
+}
+
+
+"File Too Large (413)" :{
+  "success": false,
+  "message": "profileImage size must be less than 2MB"
+}
+
+}
+```
+
+
+
+
+**If there's an internal error (e.g., MongoDB connection issues)** :
+```json
+{
+  "success": false,
+  "message": "Internal Server Error. Could not register the user.",
+  "code" : 500
+}
+```
+
+
+
+
+
 
 
 

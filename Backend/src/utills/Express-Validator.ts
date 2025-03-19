@@ -35,8 +35,6 @@ export const registerValidator = [
     
 ];
 
-
-
 export const loginValidator = [
     body("email")
         .isEmail().withMessage("Please provide a valid email")
@@ -47,4 +45,45 @@ export const loginValidator = [
         .isLength({ min: 6 }).withMessage("Password must be at least 6 characters")
         .matches(/\d/).withMessage("Password must contain a number")
         .matches(/[a-zA-Z]/).withMessage("Password must contain a letter"),
+];
+
+
+
+export const updateUserValidator = [
+    body("name")
+        .optional()
+        .isString().withMessage("Name must be a string")
+        .isLength({ min: 3 }).withMessage("Name must be at least 3 characters"),
+
+    body("bio")
+        .optional()
+        .isString().withMessage("Bio must be a string")
+        .isLength({ min: 12 }).withMessage("Bio must be at least 12 characters"),
+
+    body("phoneNumber")
+        .optional()
+        .isMobilePhone("en-IN").withMessage("Please provide a valid phone number"),
+
+    body("address")
+        .optional()
+        .isObject().withMessage("Address must be an object"),
+
+    body("address.street")
+        .optional()
+        .isString().withMessage("Street must be a string")
+        .isLength({ min: 5 }).withMessage("Street must be at least 5 characters"),
+
+    body("address.city")
+        .optional()
+        .isString().withMessage("City must be a string")
+        .isLength({ min: 2 }).withMessage("City must be at least 2 characters"),
+
+    body("address.state")
+        .optional()
+        .isString().withMessage("State must be a string")
+        .isLength({ min: 2 }).withMessage("State must be at least 2 characters"),
+
+    body("address.zipCode")
+        .optional()
+        .isPostalCode("IN").withMessage("Please provide a valid zip code"),
 ];

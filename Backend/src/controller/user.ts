@@ -1,5 +1,5 @@
 import type { Request, Response } from "express";
-import { User } from "../models/user";
+import { User, type IUser } from "../models/user";
 import { validationResult } from "express-validator";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken"
@@ -7,6 +7,8 @@ import { _config } from "../utills/Config";
 import sendSuccessResponse from "../utills/sendSuccessResponse";
 import sendErrorResponse from "../utills/sendErrorResponse";
 import type { AuthRequest } from "../middleware/userAuthMiddleware";
+import cloudinary from "../utills/cloudinary";
+import { uploadImageToCloudinary } from "../utills/multerUpload";
 
 const registerUser = async (req: Request, res: Response): Promise<void> => {
   const { name, email, password, phoneNumber } = req.body;
@@ -80,7 +82,6 @@ const loginUser = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-
 const getUserProfile = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     if (!req.userId) {
@@ -100,4 +101,62 @@ const getUserProfile = async (req: AuthRequest, res: Response): Promise<void> =>
   }
 };
 
-export { registerUser, loginUser,getUserProfile };
+ const updateUserProfile = async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.userId;
+    if (!userId) {
+      return sendErrorResponse(res, 401, "Unauthorized");
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return sendErrorResponse(res, 404, "User not found");
+    }
+
+    const { name, phoneNumber, bio, address } = req.body;
+    let updatedFields: any = { name, phoneNumber, bio, address };
+
+    let profileImage = user.profileImage;
+
+    if (req.file) {
+      console.log(req.file);
+     
+      if (user.profileImage?.publicId) {
+        await cloudinary.uploader.destroy(user.profileImage.publicId.toString());
+      }
+
+   
+
+     if (req.file) {
+      const uploadedImage: any = await uploadImageToCloudinary(req.file.path);
+      profileImage = {
+        url: uploadedImage.secure_url,
+        publicId: uploadedImage.public_id,
+      };
+    }
+
+     
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      req.userId,
+      {
+        name: req.body.name || user.name,
+        phoneNumber: req.body.phoneNumber || user.phoneNumber,
+        bio: req.body.bio || user.bio,
+        address: req.body.address || user.address,
+        profileImage,
+      },
+      { new: true }
+    );
+
+    return sendSuccessResponse(res, 200, "User profile updated successfully", { user: updatedUser });
+  } catch (error) {
+    console.error(error);
+    return sendErrorResponse(res, 500, "Internal Server Error");
+  }
+};
+
+
+
+export { registerUser, loginUser,getUserProfile,updateUserProfile };
