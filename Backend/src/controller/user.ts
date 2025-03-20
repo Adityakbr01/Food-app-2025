@@ -101,54 +101,64 @@ const getUserProfile = async (req: AuthRequest, res: Response): Promise<void> =>
   }
 };
 
- const updateUserProfile = async (req: AuthRequest, res: Response) => {
-  
-  console.log(req.body);
+const updateUserProfile = async (req: AuthRequest, res: Response):Promise<void>  => {
   try {
     const userId = req.userId;
-    if (!userId) {
-      return sendErrorResponse(res, 401, "Unauthorized");
-    }
+    if (!userId) return sendErrorResponse(res, 401, "Unauthorized");
 
     const user = await User.findById(userId);
-    if (!user) {
-      return sendErrorResponse(res, 404, "User not found");
-    }
+    if (!user) return sendErrorResponse(res, 404, "User not found");
 
-    const { userName, phoneNumber, bio, address } = req.body;
-    console.log(req.body);
-    let updatedFields: any = { userName, phoneNumber, bio, address };
 
+    const { userName, phone, bio, address } = req.body;
     let profileImage = user.profileImage;
 
     if (req.file) {
-      console.log(req.file);
-     
       if (user.profileImage?.publicId) {
         await cloudinary.uploader.destroy(user.profileImage.publicId.toString());
       }
 
-   
-
-     if (req.file) {
       const uploadedImage: any = await uploadImageToCloudinary(req.file.path);
       profileImage = {
         url: uploadedImage.secure_url,
         publicId: uploadedImage.public_id,
       };
     }
-     
-    }
+    console.log(req.body.deliveryAddresses && "Ha hai")
+
+
+    // if(!req.body.deliveryAddresses){
+    //   sendErrorResponse(res,400,"mat bheje ji")
+    // }
+
+    const newAddresses = req.body.deliveryAddresses
+    ? Array.isArray(req.body.deliveryAddresses)
+      ? req.body.deliveryAddresses
+      : [req.body.deliveryAddresses]
+    : [];  // Agar deliveryAddresses `undefined` hai to empty array assign hoga
+  
+  // ✅ Append only if newAddresses is not empty
+  const updatedAddresses = req.body.deliveryAddresses
+    ? [...(user.deliveryAddresses || []), ...newAddresses]
+    : user.deliveryAddresses;
   
 
+    // ✅ Ensure phone number is unique
+    const isPhoneNumberTaken = await User.findOne({ phoneNumber: phone }).lean();
+    if (isPhoneNumberTaken && isPhoneNumberTaken._id.toString() !== userId.toString()) {
+      return sendErrorResponse(res, 400, "Phone number already exists");
+    }
+
+    // ✅ Update User
     const updatedUser = await User.findByIdAndUpdate(
       req.userId,
       {
-        name: req.body.username || user.name,
-        phoneNumber: req.body.phone || user.phoneNumber,
-        bio: req.body.bio || user.bio,
-        address: req.body.address || user.address,
+        name: req.body.username ?? user.name,
+        phoneNumber: req.body.phone ?? user.phoneNumber,
+        bio: req.body.bio ?? user.bio,
+        address: req.body.address ?? user.address,
         profileImage,
+        deliveryAddresses: updatedAddresses, // ✅ Now addresses will be appended instead of overwritten
       },
       { new: true }
     );
@@ -160,4 +170,48 @@ const getUserProfile = async (req: AuthRequest, res: Response): Promise<void> =>
   }
 };
 
-export { registerUser, loginUser,getUserProfile,updateUserProfile };
+const DeleteDeliveryAddress = async (req: AuthRequest, res: Response):Promise<void>  => {
+  try {
+    const userId = req.userId;
+    const { addressId } = req.params; 
+
+    console.log(addressId)
+    if (!userId) {
+      return sendErrorResponse(res, 401, "Unauthorized");
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return sendErrorResponse(res, 404, "User not found!");
+    }
+
+    if (!user.deliveryAddresses || user.deliveryAddresses.length === 0) {
+      return sendErrorResponse(res,400,"No delivery addresses found")
+       
+    }
+
+    const initialLength = user.deliveryAddresses.length;
+
+    user.deliveryAddresses = user.deliveryAddresses.filter(
+      (address) => address._id.toString() !== addressId
+    );
+
+    if (user.deliveryAddresses.length === initialLength) {
+       
+       return sendErrorResponse(res,404,"Address not found!")
+    }
+
+    // ✅ Save the updated user document
+    await user.save();
+
+   return sendSuccessResponse(res,200,"Delivery address deleted successfully",{
+      deliveryAddresses: user.deliveryAddresses,
+    })
+    
+  } catch (error) {
+    console.error(error);
+    sendErrorResponse(res,500,"Internal Server Error")
+  }
+};
+
+export { registerUser, loginUser,getUserProfile,updateUserProfile,DeleteDeliveryAddress };

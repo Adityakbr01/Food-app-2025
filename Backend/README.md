@@ -504,8 +504,6 @@ koi bhi ek hona chahiye Request Body || Request cookie
 }
 ```
 
-
-
 **Or if the user input wrong** :
 
 ## Response Body :
@@ -554,6 +552,16 @@ koi bhi ek hona chahiye Request Body || Request cookie
 }
 ```
 
+**Or if the phone allready register** :
+
+```json
+{
+    "success": false,
+    "message": "Phone number already exists",
+    "code":400
+}
+```
+
 **Image Error** :
 
 ``` json
@@ -594,6 +602,113 @@ koi bhi ek hona chahiye Request Body || Request cookie
 
 
 
+
+
+&nbsp;
+
+
+
+&nbsp;
+
+
+&nbsp;
+
+
+## Endpoint: /api/users/delivery-address/:addressId
+
+Method: `DELETE`
+
+**Description**: This endpoint is used to delete single deliveryAddress. in database
+
+
+## Request Body:
+```json 
+{
+    "req.body?.token" || "Authorization bearer token"
+   
+}
+```
+koi bhi ek hona chahiye Request Body || Request cookie
+
+## Request cookie:
+```json 
+{
+    "cookies?.token"
+   
+}
+```
+
+## addressId (Required):
+```json 
+    "67dc2be4ce6bec79f3e2a236"
+```
+
+### Success Response:
+
+```json
+{
+    "success": true,
+    "message": "Delivery address deleted successfully",
+    "code":200
+}
+```
+
+### Error Response:
+
+**If validation fails, you might receive the following error response with appropriate messages:**
+
+#### Example Response:
+
+```json
+{
+    
+    "success": false,
+    "message": "Access denied. No token provided",
+     "code" : 401
+}
+```
+
+
+**Or if the user not found!** :
+
+```json
+{
+   "success": false,
+    "message": "User not found ",
+    "code" : 404
+   
+}
+```
+
+**Or if the user deliveryAddress not not found!** :
+
+```json
+{
+   "success": false,
+    "message": "No delivery addresses found ",
+    "code" : 404
+   
+}
+```
+**Or if the user deliveryAddress length = 0** :
+
+```json
+{
+   "success": false,
+    "message": "Address not found!",
+    "code" : 404
+   
+}
+```
+
+**If there's an internal error (e.g., MongoDB connection issues)** :
+```json
+{
+  "success": false,
+  "message": "Internal Server Error. Could not register the user.",
+  "code" : 500
+}
+```
 
 
 

@@ -1,5 +1,5 @@
 import { Router, type Request, type Response, type NextFunction } from "express";
-import { registerUser, loginUser, getUserProfile, updateUserProfile } from "../controller/user";
+import { registerUser, loginUser, getUserProfile, updateUserProfile, DeleteDeliveryAddress } from "../controller/user";
 import { loginValidator, registerValidator, updateUserValidator, validate } from "../utills/Express-Validator";
 import { authenticateUser } from "../middleware/userAuthMiddleware";
 import upload from "../utills/multerUpload";
@@ -17,6 +17,8 @@ userRouter.post("/register", registerValidator, validate, registerUser);
 userRouter.post("/login", loginValidator, validate, loginUser);
 userRouter.get("/profile", authenticateUser, getUserProfile);
 
+userRouter.delete("/profile/delivery-address/:addressId",authenticateUser,DeleteDeliveryAddress)
+
 userRouter.put(
     "/profile",
     authenticateUser, // ✅ Pehle authentication
@@ -31,11 +33,20 @@ userRouter.put(
                  return
             }
         }
+        if (req.body.deliveryAddresses) {
+            try {
+                req.body.deliveryAddresses = JSON.parse(req.body.deliveryAddresses);
+            } catch (error) {
+                 res.status(400).json({ error: "Invalid deliveryAddresses format" });
+                 return
+            }
+        }
         next();
     },
     updateUserValidator, // ✅ Ab validation sahi se chalega
     validate,
     updateUserProfile
 );
+
 
 export default userRouter;

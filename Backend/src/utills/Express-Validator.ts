@@ -82,6 +82,33 @@ export const updateUserValidator = [
         .isLength({ min: 2 }).withMessage("State must be at least 2 characters"),
 
     body("address.zipCode")
+    .optional()
+    .matches(/^[1-9][0-9]{5}$/)
+    .withMessage("Please provide a valid Indian ZIP code"),
+
+
+        body("deliveryAddresses")
         .optional()
-        .isPostalCode("IN").withMessage("Please provide a valid zip code"),
+        .isObject().withMessage("Address must be an object"),
+
+    body("deliveryAddresses.street")
+        .optional()
+        .isString().withMessage("Street must be a string")
+        .isLength({ min: 5 }).withMessage("Street must be at least 5 characters"),
+
+    body("deliveryAddresses.city")
+        .optional()
+        .isString().withMessage("City must be a string")
+        .isLength({ min: 2 }).withMessage("City must be at least 2 characters"),
+
+    body("deliveryAddresses.state")
+        .optional()
+        .isString().withMessage("State must be a string")
+        .isLength({ min: 2 }).withMessage("State must be at least 2 characters"),
+
+        body("deliveryAddresses.zipCode")
+        .optional()
+        .matches(/^[1-9][0-9]{5}$/)
+        .withMessage("Please provide a valid Indian ZIP code"),
+      
 ];
