@@ -36,7 +36,7 @@ export const UserApiSlice = createApi({
       async onQueryStarted(_, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled; // API response ka data
-          console.log(data.data);
+        
           dispatch(setUser(data.data.user)); // Redux store me user set karna
         } catch (error) {
           console.error("Error fetching user profile:", error);
@@ -51,6 +51,14 @@ export const UserApiSlice = createApi({
       }),
       invalidatesTags: ["User"],
     }),
+    LogoutUser: builder.mutation<void, void>({
+      query: () => ({
+        url: "/logOut",
+        method: "POST",  // ✅ Logout ke liye POST use karein
+        credentials: "include", // ✅ Ensure cookies are sent
+      }),
+      invalidatesTags: ["User"], // ✅ Logout ke baad user data invalidate kar dena
+    }),
     DeleteDeliveryAddress: builder.mutation({
       query: (addressId) => ({
         url: `/profile/delivery-address/${addressId}`, // ✅ Address ID in URL
@@ -62,4 +70,4 @@ export const UserApiSlice = createApi({
   })
 
 
-export const { useTestQuery, useRegisterUserMutation,useLoginUserMutation,useGetUserProfileQuery,useUpdateUserProfileMutation ,useDeleteDeliveryAddressMutation} = UserApiSlice;
+export const { useTestQuery, useRegisterUserMutation,useLoginUserMutation,useGetUserProfileQuery,useLogoutUserMutation,useUpdateUserProfileMutation ,useDeleteDeliveryAddressMutation} = UserApiSlice;

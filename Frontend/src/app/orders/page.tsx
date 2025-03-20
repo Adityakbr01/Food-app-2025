@@ -1,11 +1,29 @@
+"use client"
 import Link from "next/link"
 import { ArrowRight, Clock } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { MobileNavbar } from "@/components/Mobile-navBar"
+import { useRouter } from "next/navigation"
+import { useEffect } from "react"
+import { useSelector } from "react-redux"
+import { RootState } from "@/Redux/store"
+import { User } from "../profile/page"
 
 export default function page() {
+    const router = useRouter(); // ✅ Next.js ka router
+    const { user } = useSelector((state: RootState) => state.auth) as { user: User | null };
+  
+  
+    useEffect(() => {
+      if (!user) {
+        router.push("auth/Login"); // ✅ Agar user login nahi hai, to login page par redirect karein
+      }
+    }, [user, router]);
+  
+    if (!user) return null; // ✅ Jab tak user state check ho raha hai, kuch render mat karein
+  
   return (
     <div className="min-h-screen flex flex-col pb-16 md:pb-0">
       <header className="sticky top-0 bg-background z-10 border-b">
@@ -126,7 +144,6 @@ export default function page() {
           </TabsContent>
         </Tabs>
       </main>
-
       <MobileNavbar />
     </div>
   )

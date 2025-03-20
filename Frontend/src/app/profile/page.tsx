@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -23,11 +23,11 @@ import { Badge } from "@/components/ui/badge"
 import { MobileNavbar } from "@/components/Mobile-navBar"
 import { useSelector } from "react-redux"
 import { RootState } from "@/Redux/store"
-import { useDeleteDeliveryAddressMutation, useUpdateUserProfileMutation } from "@/Redux/Slice/UserApiSlice"
+import { useDeleteDeliveryAddressMutation, useLogoutUserMutation, useUpdateUserProfileMutation } from "@/Redux/Slice/UserApiSlice"
 import { toast } from "sonner"
 import { FetchBaseQueryError } from "@reduxjs/toolkit/query"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-
+import { useRouter } from "next/navigation";
 
 const addressSchema = z.object({
   street: z.string().optional(),
@@ -65,7 +65,7 @@ type ProfileFormValues = z.infer<typeof profileFormSchema>
 
 
 
-interface User {
+export interface User {
   bio?: string;
   _id?: string;
   name?: string;
@@ -90,6 +90,18 @@ export default function ProfilePage() {
   const { user } = useSelector((state: RootState) => state.auth) as { user: User | null };
   const [errors, seterrors] = useState<string | null>(null)
   const [updateUserProfile, { isLoading, isSuccess, error }] = useUpdateUserProfileMutation()
+  const router = useRouter(); // ✅ Next.js ka router
+
+
+
+  useEffect(() => {
+    if (!user) {
+      router.push("auth/Login"); // ✅ Agar user login nahi hai, to login page par redirect karein
+    }
+  }, [user, router]);
+
+  if (!user) return null; // ✅ Jab tak user state check ho raha hai, kuch render mat karein
+
 
   const {
     bio,
@@ -230,17 +242,29 @@ export default function ProfilePage() {
 
 
 
-  const [deleteDeliveryAddress, { isLoading:deleteLoading, error:deleteError }] = useDeleteDeliveryAddressMutation();
+  const [deleteDeliveryAddress, { isLoading: deleteLoading, error: deleteError }] = useDeleteDeliveryAddressMutation();
 
-  const handleDelete = async (addressId:string) => {
+  const handleDelete = async (addressId: string) => {
     try {
       await deleteDeliveryAddress(addressId).unwrap();
-    toast.success("Address deleted successfully!")
+      toast.success("Address deleted successfully!")
     } catch (err) {
       toast.error("Failed to delete address");
     }
   };
 
+
+
+  const [logoutUser] = useLogoutUserMutation();
+
+  const handleLogout = async () => {
+    try {
+      await logoutUser().unwrap();
+      router.push("/");
+    } catch (error) {
+      console.error("Logout failed", error);
+    }
+  };
   return (
     <div className="min-h-screen flex flex-col pb-16 md:pb-0">
       <header className="sticky top-0 bg-background z-10 border-b">
@@ -691,14 +715,14 @@ export default function ProfilePage() {
                                   <p className="text-sm text-muted-foreground">State : {item?.state}</p>
                                   <p className="text-sm text-muted-foreground">Zip-code : {item?.zipCode}</p>
                                 </div>
-                               <div>
-                               <Button onClick={() => ("")} variant="ghost" size="sm">
-                                  <Edit2 className="h-4 w-4" />
-                                </Button>
-                                <Button onClick={() => handleDelete(item._id)} variant="ghost" size="sm">
-                                  <Trash2 className="h-4 w-4" color="red" />
-                                </Button>
-                               </div>
+                                <div>
+                                  <Button onClick={() => ("")} variant="ghost" size="sm">
+                                    <Edit2 className="h-4 w-4" />
+                                  </Button>
+                                  <Button onClick={() => handleDelete(item._id)} variant="ghost" size="sm">
+                                    <Trash2 className="h-4 w-4" color="red" />
+                                  </Button>
+                                </div>
                               </div>
                               <div className="flex items-center gap-2 mt-2">
                                 <Badge className="bg-rose-100 text-rose-700 hover:bg-rose-100">{index + 1}st address</Badge>
@@ -726,7 +750,7 @@ export default function ProfilePage() {
                 </TabsContent>
               </Tabs>
 
-              <div className="mt-8">
+              <div onClick={handleLogout} className="mt-8">
                 <Button variant="outline" className="w-full text-red-500 hover:text-red-600 hover:bg-red-50">
                   <LogOut className="mr-2 h-4 w-4" />
                   Log Out
