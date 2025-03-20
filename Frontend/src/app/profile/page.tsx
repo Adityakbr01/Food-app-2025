@@ -8,7 +8,7 @@ import Image from "next/image"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { motion } from "framer-motion"
-import { ArrowLeft, Camera, Edit2, LogOut, MapPin, Phone, Save, User, X, Mail, Plus, Loader2, Loader } from "lucide-react"
+import { ArrowLeft, Camera, Edit2, LogOut, MapPin, Phone, Save, User, X, Mail, Plus, Loader2, Loader, Delete, DeleteIcon, Trash2 } from "lucide-react"
 import * as z from "zod"
 
 import { Button } from "@/components/ui/button"
@@ -23,8 +23,10 @@ import { Badge } from "@/components/ui/badge"
 import { MobileNavbar } from "@/components/Mobile-navBar"
 import { useSelector } from "react-redux"
 import { RootState } from "@/Redux/store"
-import { useUpdateUserProfileMutation } from "@/Redux/Slice/UserApiSlice"
+import { useDeleteDeliveryAddressMutation, useUpdateUserProfileMutation } from "@/Redux/Slice/UserApiSlice"
 import { toast } from "sonner"
+import { FetchBaseQueryError } from "@reduxjs/toolkit/query"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 
 const addressSchema = z.object({
@@ -32,6 +34,14 @@ const addressSchema = z.object({
   city: z.string().optional(),
   state: z.string().optional(),
   zipCode: z.string().optional(),
+});
+
+const deliveryAddressesSchema = z.object({
+  street: z.string().optional(),
+  city: z.string().optional(),
+  state: z.string().optional(),
+  zipCode: z.string().optional(),
+  location: z.enum(["Home", "Office", "Work", "Friend's Place", "Other"]).optional(),
 });
 
 // Form validation schema
@@ -48,6 +58,7 @@ const profileFormSchema = z.object({
     .max(15, { message: "Phone number must not be longer than 15 digits" })
     .optional(),
   address: addressSchema.optional(),
+  deliveryAddresses: deliveryAddressesSchema.optional()
 })
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>
@@ -107,11 +118,19 @@ export default function ProfilePage() {
       state: address?.state || "",
       zipCode: address?.zipCode || "",
     },
+    deliveryAddresses: {
+      street: "",
+      city: "",
+      state: "",
+      zipCode: "",
+
+    }
 
   }
 
 
   // const { toast } = useToast()
+  const [isAdressEditing, setisAdressEditing] = useState<boolean>(false)
   const [isEditing, setIsEditing] = useState(false)
   const [profileImages, setProfileImage] = useState<string | null>(
     "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fHBvcnRyYWl0fGVufDB8fDB8fHww",
@@ -145,51 +164,82 @@ export default function ProfilePage() {
   // Handle form submission
   const onSubmit = async (data: ProfileFormValues) => {
     const formData = new FormData();
-  
+
     // Append text fields to FormData
     formData.append("username", data.username);
     formData.append("email", data.email);
     formData.append("bio", data.bio || "");
     formData.append("phone", data.phone || "");
-  
+
+
     // Append address fields to FormData
     if (data.address) {
       formData.append("address", JSON.stringify(data.address));
     }
-  
+
+    console.log(data.deliveryAddresses?.city && data.deliveryAddresses?.location && data.deliveryAddresses?.state && data.deliveryAddresses?.street && data.deliveryAddresses?.zipCode)
+    if (data.deliveryAddresses?.city && data.deliveryAddresses?.location && data.deliveryAddresses?.state && data.deliveryAddresses?.street && data.deliveryAddresses?.zipCode) {
+      formData.append("deliveryAddresses", JSON.stringify(data.deliveryAddresses));
+    }
+
     // Append profile image if selected
     const fileInput = document.querySelector<HTMLInputElement>("#profileImageInput");
-     console.log(fileInput)
+
     if (fileInput?.files?.[0]) {
-      formData.append("profileImage", fileInput.files[0]); 
+      formData.append("profileImage", fileInput.files[0]);
     }
-  
-    for (let [key, value] of formData.entries()) {
-      console.log(`${key}:`, value);
-    }
-  
+
+
     // Send FormData to API
     const updated_user = await updateUserProfile(formData);
-    
+
     if (updated_user.error) {
-      updated_user.error.data?.errors.forEach((err: any) => {
-        toast.error(err.msg);
-      });
+      const error = updated_user.error as FetchBaseQueryError;
+
+      if (error.data) {
+        toast.error((error.data as any).message || "Error updating profile!");
+      }
+
+      if ("data" in updated_user.error) {
+        (updated_user.error.data as any)?.errors?.forEach((err: any) => {
+          console.log(err)
+          toast.error(err.msg || err.message);
+        });
+      } else {
+        toast.error("Something went wrong!");
+      }
       return;
     }
-  
+
+    console.log(formData)
+
+
     // Update UI after successful update
     toast.success(updated_user.data.message || "Profile updated successfully!");
     setProfileImage(imagePreview);
     setIsEditing(false);
+    setisAdressEditing(false)
   };
-  
+
   // Cancel editing
   const handleCancel = () => {
     form.reset()
     setImagePreview(profileImage?.url!)
     setIsEditing(false)
   }
+
+
+
+  const [deleteDeliveryAddress, { isLoading:deleteLoading, error:deleteError }] = useDeleteDeliveryAddressMutation();
+
+  const handleDelete = async (addressId:string) => {
+    try {
+      await deleteDeliveryAddress(addressId).unwrap();
+    toast.success("Address deleted successfully!")
+    } catch (err) {
+      toast.error("Failed to delete address");
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col pb-16 md:pb-0">
@@ -210,7 +260,9 @@ export default function ProfilePage() {
       </header>
 
       <main className="flex-1 container px-4 py-6">
+
         <div className="max-w-3xl mx-auto">
+
           {isEditing ? (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -230,7 +282,7 @@ export default function ProfilePage() {
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                       <div className="flex flex-col items-center mb-6">
                         <div className="relative">
-                        
+
                           <div className="h-24 w-24 rounded-full overflow-hidden border-4 border-background shadow-md">
                             <Image
                               src={imagePreview || "/placeholder.svg"}
@@ -383,7 +435,127 @@ export default function ProfilePage() {
                 </CardFooter>
               </Card>
             </motion.div>
-          ) : (
+          ) : isAdressEditing ? (
+            //Add adress
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3 }}
+            >
+              <Card>
+                <CardHeader>
+                  <CardTitle>Add Address</CardTitle>
+                  <CardDescription>
+                    Make changes to your address information here. Click save when you're done.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+
+
+                      <div className="grid gap-5 md:grid-cols-2">
+                        <FormField
+                          control={form.control}
+                          name="deliveryAddresses.city"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>City</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Your City" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+
+                        <FormField
+                          control={form.control}
+                          name="deliveryAddresses.state"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>State</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Your State" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name="deliveryAddresses.street"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Street</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Street Address" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name="deliveryAddresses.zipCode"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Zip Code</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Zip Code" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name="deliveryAddresses.location"
+                          render={({ field }) => (
+                            <FormItem key={field.name}>
+                              <FormLabel>Location</FormLabel>
+                              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select a location" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {["Home", "Office", "Work", "Friend's Place", "Other"].map((location) => (
+                                    <SelectItem key={location} value={location}>
+                                      {location}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+
+
+                      </div>
+
+                    </form>
+                  </Form>
+                </CardContent>
+                <CardFooter className="flex justify-between">
+                  <Button className="cursor-pointer" variant="outline" onClick={() => setisAdressEditing(false)}>
+                    <X className="mr-2 h-4 w-4" />
+                    Cancel
+                  </Button>
+                  <Button className="cursor-pointer" onClick={form.handleSubmit(onSubmit)}>
+                    <Save className="mr-2 h-4 w-4" />
+                    {isLoading ? <>
+                      <Loader className="mr-2 h-4 w-4 animate-spin" /></> : "Save changes"}
+                  </Button>
+                </CardFooter>
+              </Card>
+            </motion.div>) : (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -453,7 +625,6 @@ export default function ProfilePage() {
                           <div>
                             <p className="text-sm font-medium">Address</p>
                             <p className="text-sm text-muted-foreground">{address.city}</p>
-
                           </div>
                         </div>
                       )}
@@ -494,12 +665,12 @@ export default function ProfilePage() {
                           <div className="flex justify-between items-start mb-2">
                             <div>
                               <p className="font-medium">Home</p>
-                              <p className="text-sm text-muted-foreground">{address?.city}</p>
-                              <p className="text-sm text-muted-foreground">{address?.street}</p>
-                              <p className="text-sm text-muted-foreground">{address?.state}</p>
-                              <p className="text-sm text-muted-foreground">{address?.zipCode}</p>
+                              <p className="text-sm text-muted-foreground">City : {address?.city}</p>
+                              <p className="text-sm text-muted-foreground">Street : {address?.street}</p>
+                              <p className="text-sm text-muted-foreground">State : {address?.state}</p>
+                              <p className="text-sm text-muted-foreground">Zip-code : {address?.zipCode}</p>
                             </div>
-                            <Button variant="ghost" size="sm">
+                            <Button onClick={() => setIsEditing(true)} variant="ghost" size="sm">
                               <Edit2 className="h-4 w-4" />
                             </Button>
                           </div>
@@ -508,15 +679,45 @@ export default function ProfilePage() {
                             <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-100">Home</Badge>
                           </div>
                         </div>
-                        <Button variant="outline" className="w-full">
-                          <Plus className="mr-2 h-4 w-4" />
-                          Add New Address
-                        </Button>
+
+                        {deliveryAddresses && deliveryAddresses.length > 0 && (
+                          deliveryAddresses.map((item, index) => (
+                            <div className="border rounded-lg p-4">
+                              <div className="flex justify-between items-start mb-2">
+                                <div>
+                                  <p className="font-medium">Delivery Address</p>
+                                  <p className="text-sm text-muted-foreground">City : {item?.city}</p>
+                                  <p className="text-sm text-muted-foreground">Street : {item?.street}</p>
+                                  <p className="text-sm text-muted-foreground">State : {item?.state}</p>
+                                  <p className="text-sm text-muted-foreground">Zip-code : {item?.zipCode}</p>
+                                </div>
+                               <div>
+                               <Button onClick={() => ("")} variant="ghost" size="sm">
+                                  <Edit2 className="h-4 w-4" />
+                                </Button>
+                                <Button onClick={() => handleDelete(item._id)} variant="ghost" size="sm">
+                                  <Trash2 className="h-4 w-4" color="red" />
+                                </Button>
+                               </div>
+                              </div>
+                              <div className="flex items-center gap-2 mt-2">
+                                <Badge className="bg-rose-100 text-rose-700 hover:bg-rose-100">{index + 1}st address</Badge>
+                                <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-100">{item?.location}</Badge>
+                              </div>
+                            </div>
+                          ))
+                        )}
+                        {deliveryAddresses && deliveryAddresses?.length < 3 && (
+                          <Button onClick={() => setisAdressEditing(true)} variant="outline" className="w-full">
+                            <Plus className="mr-2 h-4 w-4" />
+                            Add New Address
+                          </Button>
+                        )}
                       </CardContent>
                     ) : <CardContent>
                       <div className="text-center py-8">
                         <p className="text-muted-foreground">You have no saved addresses</p>
-                        <Button className="mt-4 cursor-pointer" onClick={() => setIsEditing(true)}>
+                        <Button className="mt-4 cursor-pointer" onClick={() => setisAdressEditing(true)}>
                           Add New Address
                         </Button>
                       </div>

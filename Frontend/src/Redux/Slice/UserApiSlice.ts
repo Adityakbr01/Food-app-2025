@@ -50,8 +50,16 @@ export const UserApiSlice = createApi({
         body: userData,
       }),
       invalidatesTags: ["User"],
-    })
+    }),
+    DeleteDeliveryAddress: builder.mutation({
+      query: (addressId) => ({
+        url: `/profile/delivery-address/${addressId}`, // ✅ Address ID in URL
+        method: "DELETE",
+      }),
+      invalidatesTags: ["User"], // ✅ Refresh user data after deletion
+    }),
   }),
-});
+  })
 
-export const { useTestQuery, useRegisterUserMutation,useLoginUserMutation,useGetUserProfileQuery,useUpdateUserProfileMutation } = UserApiSlice;
+
+export const { useTestQuery, useRegisterUserMutation,useLoginUserMutation,useGetUserProfileQuery,useUpdateUserProfileMutation ,useDeleteDeliveryAddressMutation} = UserApiSlice;
