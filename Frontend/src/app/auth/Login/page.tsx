@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label"
 import { Loader, Mail, Lock, Eye, EyeOff } from "lucide-react"
 import Link from "next/link"
 import { useLoginUserMutation } from "@/Redux/Slice/UserApiSlice"
-
+import { useRouter } from "next/navigation";
 // Validation Schema
 const loginSchema = z.object({
   email: z.string().email("Please provide a valid email"),
@@ -25,6 +25,8 @@ export default function Login() {
   // In a real app, you would use your Redux hook
   const [isLoading, setIsLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
+   const router = useRouter(); 
+  
 
   // React Hook Form Setup
   const {
@@ -46,6 +48,7 @@ export default function Login() {
   
       toast.success("Login successful! 🎉");
       reset();
+      router.replace("/profile"); 
     } catch (err: any) {
       console.log("Login Error:", err);
   

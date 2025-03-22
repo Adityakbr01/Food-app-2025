@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Loader, Mail, Lock, User, Phone, Eye, EyeOff } from "lucide-react";
 import { z } from "zod";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 // ✅ **Validation Schema**
 const registerSchema = z.object({
@@ -28,6 +29,9 @@ export default function Register() {
   const [registerUser, { isLoading }] = useRegisterUserMutation();
   const [showPassword, setShowPassword] = useState(false);
 
+    const router = useRouter(); // ✅ Next.js ka router
+    
+  
   // ✅ **React Hook Form Setup**
   const {
     register,
@@ -45,6 +49,7 @@ export default function Register() {
       await registerUser(data).unwrap();
       toast.success("User registered successfully! 🎉");
       reset();
+      router.replace("/auth/Login");
     } catch (err: any) {
       console.log("Registration Error:", err);
 
