@@ -1277,3 +1277,556 @@ Success Response:{
   "message": "Internal Server. Error deleting restaurant."
 }
 ```
+
+
+
+&nbsp;
+
+&nbsp;
+&nbsp;
+## Restaurant Menu Endpoints
+
+&nbsp;
+
+
+
+### Endpoint: /api/menu/
+
+Method: `POST`
+
+**Description**: This endpoint is used to add a new Menu. It accepts Menu details and creates a new menu in the restaurant
+
+
+
+## Request Body:
+```json 
+{
+    "req.body?.token" || "Authorization bearer token"
+   
+}
+```
+koi bhi ek hona chahiye Request Body || Request cookie
+
+## Request cookie:
+```json 
+{
+    "cookies?.token"
+   
+}
+```
+
+
+## Request Body:
+```json 
+{
+    "_id": "menu006",
+    "restaurantId": "67d678e0b11db5e1b7bb0281",
+    "name": "Garlic Bread",
+    "price": 120,
+    "category": "Starter",
+    "isVeg": true,
+    "description": "Toasted bread with garlic and herbs.",
+    "image": "https://example.com/garlic-bread.jpg",
+    "isAvailable": true
+  }
+```
+
+#### Validation Checks (Before creating a user):
+
+1. **Name**: 
+   - Required.
+   - Must be a string.
+   - Must be at least **3 characters** long.
+
+2. **price**: 
+   - Required.
+   - Must be a valid **address** (e.g., `Naya Bhojpur`).
+   - Must be at least **6 characters** long.
+   - 
+3. **description**: 
+   - Required.
+   - Must be a string.
+   - Must be at least **10 characters** long.
+
+
+### Success Response:
+
+```json
+Success Response:{
+    "success": true,
+    "message": "Menu item created successfully",
+    "data": {
+        "restaurantId": "67dec06361cfa1067b1f66e8",
+        "name": "Garlic Breadd",
+        "price": 120,
+        "category": "Starter",
+        "isVeg": true,
+        "description": "Toasted bread with garlic and herbs.",
+        "image": "https://example.com/garlic-bread.jpg",
+        "isAvailable": true,
+        "_id": "67decb1acce441f9567caeea",
+        "__v": 0
+    }
+}
+```
+
+### Error Response:
+
+**If validation fails, you might receive the following error response with appropriate messages:**
+
+#### Example Response:
+
+```json
+{
+{
+    "errors": [
+        {
+            "type": "field",
+            "msg": "Name must be a string",
+            "path": "name",
+            "location": "body"
+        },
+        {
+            "type": "field",
+            "msg": "Name must be at least 3 characters",
+            "path": "name",
+            "location": "body"
+        },
+        {
+            "type": "field",
+            "msg": "isVeg must be a boolean",
+            "path": "isVeg",
+            "location": "body"
+        },
+        {
+            "type": "field",
+            "msg": "Invalid value",
+            "path": "description",
+            "location": "body"
+        },
+        {
+            "type": "field",
+            "msg": "Description is required",
+            "path": "description",
+            "location": "body"
+        }
+    ]
+}
+}
+```
+
+
+**Or if the Menu already exists** :
+
+```json
+{
+    "success": false,
+    "message": "Menu item already exists for this restaurant"
+}
+```
+
+**Or if the userRole customer not match** :
+
+```json
+{
+    "success": false,
+    "message": "Admin or restaurant owner access required"
+}
+```
+
+**Or if the restourant blocked || delete** :
+
+```json
+{
+    "success": false,
+    "message": "Your restaurant is blocked please contact to admin"
+}
+```
+
+
+**If there's an internal error (e.g., MongoDB connection issues)** :
+```json
+
+{
+  "success": false,
+  "message": "Internal Server"
+}
+```
+
+&nbsp;
+
+
+
+
+
+
+### Endpoint: /api/menu/restaurant/:restaurantId
+
+Method: `GET`
+
+**Description**: This endpoint is used to GET Menus. It accepts restaurantId
+
+
+
+## Request Body:
+```json 
+{
+    "req.body?.token" || "Authorization bearer token"
+   
+}
+```
+koi bhi ek hona chahiye Request Body || Request cookie
+
+## Request cookie:
+```json 
+{
+    "cookies?.token"
+   
+}
+```
+
+
+## Request Body:
+```json 
+{
+
+}
+```
+
+## Request params:
+```json 
+{
+   "restaurantId" : "mongooseObjectId"
+}
+```
+
+
+### Success Response:
+
+```json
+Success Response:{
+    "success": true,
+    "message": "Menu items fetched successfully",
+    "data": [
+        {
+            "_id": "67dec499313fe2b7f38502cb",
+            "restaurantId": "67dec06361cfa1067b1f66e8",
+            "name": "Gulab Jamunn",
+            "price": 100,
+            "category": "Dessert",
+            "isVeg": true,
+            "description": "Soft and sweet gulab jamun soaked in sugar syrup.",
+            "image": "https://example.com/gulab-jamun.jpg",
+            "isAvailable": true,
+            "__v": 0
+        },
+        {
+            "_id": "67dec6e6dd61785459422bee",
+            "restaurantId": "67dec06361cfa1067b1f66e8",
+            "name": "Chicken Biryani",
+            "price": 250,
+            "category": "Main Course",
+            "isVeg": false,
+            "description": "Spicy and succulent chicken biryani with aromatic basmati rice.",
+            "image": "https://example.com/chicken-biryani.jpg",
+            "isAvailable": true,
+            "__v": 0
+        },
+        {
+            "_id": "67dec6f1dd61785459422bf2",
+            "restaurantId": "67dec06361cfa1067b1f66e8",
+            "name": "Veg Pulao",
+            "price": 180,
+            "category": "Main Course",
+            "isVeg": true,
+            "description": "Flavorful vegetable pulao with fresh spices.",
+            "image": "https://example.com/veg-pulao.jpg",
+            "isAvailable": true,
+            "__v": 0
+        },
+        {
+            "_id": "67dec723dd61785459422bf9",
+            "restaurantId": "67dec06361cfa1067b1f66e8",
+            "name": "Gulab Jamun",
+            "price": 100,
+            "category": "Dessert",
+            "isVeg": true,
+            "description": "Soft and sweet gulab jamun soaked in sugar syrup.",
+            "image": "https://example.com/gulab-jamun.jpg",
+            "isAvailable": true,
+            "__v": 0
+        },
+        {
+            "_id": "67dec7ebdd61785459422c01",
+            "restaurantId": "67dec06361cfa1067b1f66e8",
+            "name": "Margherita Pizza",
+            "price": 300,
+            "category": "Pizza",
+            "isVeg": true,
+            "description": "Classic pizza with fresh tomatoes and mozzarella.",
+            "image": "https://example.com/margherita-pizza.jpg",
+            "isAvailable": true,
+            "__v": 0
+        },
+        {
+            "_id": "67dec80cdd61785459422c06",
+            "restaurantId": "67dec06361cfa1067b1f66e8",
+            "name": "Garlic Bread",
+            "price": 120,
+            "category": "Starter",
+            "isVeg": true,
+            "description": "Toasted bread with garlic and herbs.",
+            "image": "https://example.com/garlic-bread.jpg",
+            "isAvailable": true,
+            "__v": 0
+        },
+        {
+            "_id": "67decb1acce441f9567caeea",
+            "restaurantId": "67dec06361cfa1067b1f66e8",
+            "name": "Garlic Breadd",
+            "price": 120,
+            "category": "Starter",
+            "isVeg": true,
+            "description": "Toasted bread with garlic and herbs.",
+            "image": "https://example.com/garlic-bread.jpg",
+            "isAvailable": true,
+            "__v": 0
+        }
+    ]
+}
+```
+
+### Error Response:
+
+**If validation fails, you might receive the following error response with appropriate messages:**
+
+#### Example Response:
+
+```json
+{
+    "message":"No menu items found for this restaurant"
+}
+```
+
+
+
+
+```json
+**If there's an internal error (e.g., MongoDB connection issues)** :
+```json
+
+{
+  "success": false,
+  "message": "Internal Server"
+}
+```
+
+&nbsp;
+
+
+
+
+### Endpoint: /api/menu/:menuId
+
+Method: `PUT`
+
+**Description**: This endpoint is used to update a Menu. It accepts menuId and menuData
+
+
+
+## Request Body:
+```json 
+{
+    "req.body?.token" || "Authorization bearer token"
+   
+}
+```
+koi bhi ek hona chahiye Request Body || Request cookie
+
+## Request cookie:
+```json 
+{
+    "cookies?.token"
+}
+```
+
+
+## Request Body:
+```json 
+{
+            "restaurantId": "67dec06361cfa1067b1f66e8",
+            "name": "Gulab Jamun",
+            "price": 100,
+            "category": "Dessert",
+            "isVeg": true,
+            "description": "Soft and sweet gulab jamun soaked in sugar syrup.",
+            "image": "https://example.com/gulab-jamun.jpg",
+            "isAvailable": true,
+            "__v": 0
+}
+```
+
+## Request params:
+```json 
+{
+   "menuId" : "mongooseObjectId"
+}
+```
+
+
+### Success Response:
+
+```json
+Success Response:{
+    "success": true,
+    "message": "Menu item updated successfully",
+    "data": {
+        "_id": "67dec499313fe2b7f38502cb",
+        "restaurantId": "67dec06361cfa1067b1f66e8",
+        "name": "Gulab Jamun",
+        "price": 100,
+        "category": "Dessert",
+        "isVeg": true,
+        "description": "Soft and sweet gulab jamun soaked in sugar syrup.",
+        "image": "https://example.com/gulab-jamun.jpg",
+        "isAvailable": true,
+        "__v": 0
+    }
+}
+```
+
+### Error Response:
+
+**If validation fails, you might receive the following error response with appropriate messages:**
+
+#### Example Response:
+
+```json
+{
+    "success": false,
+    "message": "Menu item not found"
+}
+```
+
+**Or if restourant blocked/delete**
+```json
+{
+   "message": "You are not authorized to update this menu item or restaurant is blocked/deleted"
+}
+```
+
+**Or if userRole did not match**
+```json
+{
+   "message": "Admin or restaurant owner access required"
+}
+```
+**If there's an internal error (e.g., MongoDB connection issues)** :
+
+```json
+
+{
+  "success": false,
+  "message": "Internal Server"
+}
+```
+
+&nbsp;
+
+
+
+
+
+
+### Endpoint: /api/menu/:menuId
+
+Method: `DELETE`
+
+**Description**: This endpoint is used to delete a Menu. It accepts menuId
+
+
+
+## Request Body:
+```json 
+{
+    "req.body?.token" || "Authorization bearer token"
+   
+}
+```
+koi bhi ek hona chahiye Request Body || Request cookie
+
+## Request cookie:
+```json 
+{
+    "cookies?.token"
+}
+```
+
+
+## Request Body:
+```json 
+{
+
+}
+```
+
+## Request params:
+```json 
+{
+   "menuId" : "mongooseObjectId"
+}
+```
+
+
+### Success Response:
+
+```json
+Success Response:{
+    "success": true,
+    "message": "Menu item deleted successfully",
+    "data": {}
+}
+```
+
+### Error Response:
+
+**If validation fails, you might receive the following error response with appropriate messages:**
+
+#### Example Response:
+
+```json
+{
+    "success": false,
+    "message": "Menu item not found"
+}
+```
+
+**Or if restourant blocked/delete**
+```json
+{
+   "message": "You are not authorized to update this menu item or restaurant is blocked/deleted"
+}
+```
+
+**Or if userRole did not match**
+```json
+{
+   "message": "Admin or restaurant owner access required"
+}
+```
+**If there's an internal error (e.g., MongoDB connection issues)** :
+
+```json
+
+{
+  "success": false,
+  "message": "Internal Server"
+}
+```
+
+&nbsp;
+
+
+
+
+

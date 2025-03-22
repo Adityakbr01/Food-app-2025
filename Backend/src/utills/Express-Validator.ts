@@ -135,3 +135,17 @@ export const createRestaurantValidator = [
         .withMessage("Please provide a valid 10-digit phone number"),
     body("description").isString().isLength({ min: 10 }).withMessage("Description is required"),    
 ];
+
+export const createMenuValidator = [
+    body("name")
+        .isString().withMessage("Name must be a string")
+        .isLength({ min: 3 }).withMessage("Name must be at least 3 characters"),
+    body("price")
+        .isNumeric().withMessage("Price must be a number"),
+    body("category")
+        .isString().withMessage("Category must be a string")
+        .isLength({ min: 3 }).withMessage("Category must be at least 3 characters"),
+    body("isVeg")
+        .isBoolean().withMessage("isVeg must be a boolean"),
+    body("description").isString().isLength({ min: 10 }).withMessage("Description is required"),
+];
