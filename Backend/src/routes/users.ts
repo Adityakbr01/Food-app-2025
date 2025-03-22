@@ -1,5 +1,5 @@
 import { Router, type Request, type Response, type NextFunction } from "express";
-import { registerUser, loginUser, getUserProfile, updateUserProfile, DeleteDeliveryAddress } from "../controller/user";
+import { registerUser, loginUser, getUserProfile, updateUserProfile, DeleteDeliveryAddress, logOutUser } from "../controller/user";
 import { loginValidator, registerValidator, updateUserValidator, validate } from "../utills/Express-Validator";
 import { authenticateUser } from "../middleware/userAuthMiddleware";
 import upload from "../utills/multerUpload";
@@ -16,8 +16,6 @@ userRouter.get("/test", (req, res) => {
 userRouter.post("/register", registerValidator, validate, registerUser);
 userRouter.post("/login", loginValidator, validate, loginUser);
 userRouter.get("/profile", authenticateUser, getUserProfile);
-
-userRouter.delete("/profile/delivery-address/:addressId",authenticateUser,DeleteDeliveryAddress)
 
 userRouter.put(
     "/profile",
@@ -47,6 +45,8 @@ userRouter.put(
     validate,
     updateUserProfile
 );
+userRouter.delete("/profile/delivery-address/:addressId",authenticateUser,DeleteDeliveryAddress)
+userRouter.post("/logOut",authenticateUser,logOutUser)
 
 
 export default userRouter;

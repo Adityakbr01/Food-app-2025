@@ -9,6 +9,9 @@ import { _config } from "./utills/Config";
 import { logger } from "./utills/logger";
 import userRouter from "./routes/users";
 import cookieParser from "cookie-parser";
+import RestaurantRouter from "./routes/Restaurant";
+import MenuRouter from "./routes/menuRoutes";
+import ReviewRouter from "./routes/reviewRoutes";
 
 // Load environment variables
 dotenv.config();
@@ -45,7 +48,9 @@ app.get("/", (req, res) => {
 
 
 app.use("/api/users", userRouter);
-
+app.use("/api/restaurants", RestaurantRouter);
+app.use('/api/reviews', ReviewRouter);
+app.use('/api/menu', MenuRouter);
 
 // 404 Handler
 app.use((req, res) => {

@@ -593,7 +593,7 @@ koi bhi ek hona chahiye Request Body || Request cookie
 ```json
 {
   "success": false,
-  "message": "Internal Server Error. Could not register the user.",
+  "message": "Internal Server Error",
   "code" : 500
 }
 ```
@@ -705,7 +705,7 @@ koi bhi ek hona chahiye Request Body || Request cookie
 ```json
 {
   "success": false,
-  "message": "Internal Server Error. Could not register the user.",
+  "message": "Internal Server Error",
   "code" : 500
 }
 ```
@@ -713,3 +713,567 @@ koi bhi ek hona chahiye Request Body || Request cookie
 
 
 
+&nbsp;
+
+
+&nbsp;
+
+## Restaurant Endpoints
+
+### Endpoint: `/api/restaurants/test`
+
+**Method**: `GET`
+
+**Description**: This is a test endpoint to check if the restaurants route is working.
+
+#### Success Response:
+
+```json
+{
+  "success": true,
+  "message": "restaurants route working hai G"
+}
+```
+
+#### error Response:
+
+```json
+{
+  "success": false,
+  "message": "Something went wrong"
+}
+```
+
+
+
+&nbsp;
+
+
+&nbsp;
+
+
+### Endpoint: /api/restaurants/create
+
+Method: `POST`
+
+**Description**: This endpoint is used to register a new restaurants. It accepts restaurants details and creates a new restaurant in the database
+
+
+
+## Request Body:
+```json 
+{
+    "req.body?.token" || "Authorization bearer token"
+   
+}
+```
+koi bhi ek hona chahiye Request Body || Request cookie
+
+## Request cookie:
+```json 
+{
+    "cookies?.token"
+   
+}
+```
+
+
+## Request Body:
+```json 
+{
+    "name":"Bhelpuriya",
+    "address":"Naya Bhojpur",
+    "city":"Dumraon",
+    "state":"Bihar",
+    "zipCode":"802133",
+    "phoneNumber":9304922632,
+    "description":"This is the Best in Local Areas"
+
+}
+```
+
+#### Validation Checks (Before creating a user):
+
+1. **Name**: 
+   - Required.
+   - Must be a string.
+   - Must be at least **3 characters** long.
+
+2. **address**: 
+   - Required.
+   - Must be a valid **address** (e.g., `Naya Bhojpur`).
+   - Must be at least **6 characters** long.
+
+3. **city**: 
+   - Required.
+   - Must be at least **4 characters** long.
+
+
+4. **state**: 
+   - Required.
+   - must be a **4 characters** (e.g., `bihar`).
+
+5. **zipCode**:
+   - Required.
+   - must be a valid zipCode (e.g., `802133`).
+
+6. **phoneNumber** :
+   - Required.
+   - Must be a number.
+   - must be a valid phoneNumber (e.g., `9304922632`).
+
+7. **description**: 
+   - Required.
+   - Must be a string.
+   - Must be at least **10 characters** long.
+
+
+### Success Response:
+
+```json
+Success Response:{
+    "success": true,
+    "message": "Restaurant created successfully",
+    "data": {
+        "name": "Bhelpuriya",
+        "address": "Naya Bhojpur",
+        "city": "Dumraon",
+        "state": "Bihar",
+        "zipCode": "802133",
+        "phoneNumber": "9304922632",
+        "description": "This is the Best in Local Areas",
+        "image": "https://example.com/default-restaurant.jpg",
+        "rating": 0,
+        "reviews": [],
+        "menu": [],
+        "isDeleted": false,
+        "deletedAt": null,
+        "isVerified": false,
+        "verifiedAt": null,
+        "verifiedBy": null,
+        "verifiedReason": null,
+        "isBlocked": false,
+        "blockedAt": null,
+        "blockedBy": null,
+        "blockedReason": null,
+        "createdBy": "67d678e0b11db5e1b7bb027f",
+        "_id": "67de7f5cb22322ee01b72dbe",
+        "createdAt": "2025-03-22T09:14:04.415Z",
+        "updatedAt": "2025-03-22T09:14:04.419Z",
+        "__v": 0
+    }
+}
+```
+
+### Error Response:
+
+**If validation fails, you might receive the following error response with appropriate messages:**
+
+#### Example Response:
+
+```json
+{
+{
+    "errors": [
+        {
+            "type": "field",
+            "msg": "Please provide a valid Indian ZIP code",
+            "path": "zipCode",
+            "location": "body"
+        },
+        {
+            "type": "field",
+            "msg": "Please provide a valid 10-digit phone number",
+            "path": "phoneNumber",
+            "location": "body"
+        }
+    ]
+}
+}
+```
+
+
+**Or if the restaurant already exists** :
+
+```json
+{
+    "success": false,
+    "message": "Restaurant with this name and address already exists"
+}
+```
+
+**Or if the userRole customer not match** :
+
+```json
+{
+    "success": false,
+    "message": "Admin or restaurant owner access required"
+}
+```
+
+**Or if the restourant name allready  exists** :
+
+```json
+{
+    "success": false,
+    "message": "Restaurant with this name and address already exists"
+}
+```
+
+
+**If there's an internal error (e.g., MongoDB connection issues)** :
+```json
+
+{
+  "success": false,
+  "message": "Internal Server"
+}
+```
+
+&nbsp;
+
+&nbsp;
+
+
+### Endpoint: /api/restaurants/all
+
+Method: `GET`
+
+**Description**: This endpoint is used to GET a all restaurants. in the database
+
+## Request Body:
+```json 
+{ 
+
+}
+```
+
+### Success Response:
+
+```json
+Success Response:{
+    "success": true,
+    "message": "Restaurants fetched successfully",
+    "data": [
+        {
+            "_id": "67de7f5cb22322ee01b72dbe",
+            "name": "Bhelpuriya",
+            "address": "Naya Bhojpur",
+            "city": "Dumraon",
+            "state": "Bihar",
+            "zipCode": "802133",
+            "phoneNumber": "9304922632",
+            "description": "This is the Best in Local Areas",
+            "image": "https://example.com/default-restaurant.jpg",
+            "rating": 0,
+            "isDeleted": false,
+            "deletedAt": null,
+            "isVerified": false,
+            "verifiedAt": null,
+            "verifiedBy": null,
+            "verifiedReason": null,
+            "isBlocked": false,
+            "blockedAt": null,
+            "blockedBy": null,
+            "blockedReason": null,
+            "createdBy": "67d678e0b11db5e1b7bb027f",
+            "createdAt": "2025-03-22T09:14:04.415Z",
+            "updatedAt": "2025-03-22T09:14:04.419Z",
+            "__v": 0
+        }
+    ]
+}
+```
+
+### Error Response:
+
+**If fails, you might receive the following error response with appropriate messages:**
+
+#### Example Response:
+
+```json
+{
+{
+    "success": false,
+    "message": "No restaurants found"
+}
+}
+```
+
+
+**If there's an internal error (e.g., MongoDB connection issues)** :
+```json
+
+{
+  "success": false,
+  "message": "Internal Server Error"
+}
+```
+
+&nbsp;
+
+&nbsp;
+
+
+
+
+
+### Endpoint: /api/restaurants/67de6f8189aa7fc08c350b7c
+
+Method: `GET`
+
+**Description**: This endpoint is used to GET a single restaurant. in the database
+
+
+## Request Body:
+```json 
+{ 
+
+}
+```
+
+## Request Params 
+
+
+```json
+{
+"restaurantId":"67de6f8189aa7fc08c350b7c"
+}
+```
+### Success Response:
+
+```json
+Success Response:{
+    "success": true,
+    "message": "Restaurant fetched successfully",
+    "data": {
+        "_id": "67de820eb22322ee01b72dc4",
+        "name": "Bhelpuriya",
+        "address": "Naya Bhojpur",
+        "city": "Dumraon",
+        "state": "Bihar",
+        "zipCode": "802133",
+        "phoneNumber": "9304922632",
+        "description": "This is the Best in Local Areas",
+        "image": "https://example.com/default-restaurant.jpg",
+        "rating": 0,
+        "reviews": [],
+        "menu": [],
+        "isDeleted": false,
+        "deletedAt": null,
+        "isVerified": false,
+        "verifiedAt": null,
+        "verifiedBy": null,
+        "verifiedReason": null,
+        "isBlocked": false,
+        "blockedAt": null,
+        "blockedBy": null,
+        "blockedReason": null,
+        "createdBy": "67d678e0b11db5e1b7bb027f",
+        "createdAt": "2025-03-22T09:25:34.797Z",
+        "updatedAt": "2025-03-22T09:25:34.797Z",
+        "__v": 0
+    }
+}
+```
+
+
+### Error Response:
+
+**If fails, you might receive the following error response with appropriate messages:**
+
+#### Example Response:
+
+```json
+{
+    "success": false,
+    "message": "Restaurant not found"
+}
+```
+
+
+**If there's an internal error (e.g., MongoDB connection issues)** :
+```json
+
+{
+  "success": false,
+  "message": "Internal Server Error."
+}
+```
+
+
+
+
+
+### Endpoint: /api/restaurants/67de6f8189aa7fc08c350b7c
+
+Method: `PUT`
+
+**Description**: This endpoint is used to Update a single restaurant. in the database
+
+
+## Request Body:
+```json 
+{
+    "req.body?.token" || "Authorization bearer token"
+   
+}
+```
+koi bhi ek hona chahiye Request Body || Request cookie
+
+## Request cookie:
+```json 
+{
+    "cookies?.token"
+   
+}
+```
+
+## Request Body:
+```json 
+{ 
+{
+    "name":"Bhelpuriya",
+    "address":"Naya Bhojpur",
+    "city":"Dumraon",
+    "state":"Bihar",
+    "zipCode":"802133",
+    "phoneNumber":9304922632,
+    "description":"This is the Best in Local Areas"
+
+}
+}
+```
+
+## Request Params 
+
+
+```json
+{
+"restaurantId":"67de6f8189aa7fc08c350b7c"
+}
+```
+### Success Response:
+
+```json
+Success Response:{
+    "success": true,
+    "message": "Restaurant updated successfully",
+    "data": {}
+}
+```
+
+
+### Error Response:
+
+**If fails, you might receive the following error response with appropriate messages:**
+
+#### Example Response:
+
+```json
+{
+    "success": false,
+    "message": "Restaurant not found or you are not authorized to update it"
+}
+```
+
+
+**If there's an internal error (e.g., MongoDB connection issues)** :
+```json
+
+{
+  "success": false,
+  "message": "Internal Server Error."
+}
+```
+
+
+
+### Endpoint: /api/restaurants/67de6f8189aa7fc08c350b7c
+
+Method: `DELETE`
+
+**Description**: This endpoint is used to delete a single restaurant. in the database
+
+
+## Request Body:
+```json 
+{
+    "req.body?.token" || "Authorization bearer token"
+   
+}
+```
+koi bhi ek hona chahiye Request Body || Request cookie
+
+## Request cookie:
+```json 
+{
+    "cookies?.token"
+   
+}
+```
+
+## Request Body:
+```json 
+{ 
+
+}
+```
+
+## Request Params 
+
+
+```json
+{
+"restaurantId":"67de6f8189aa7fc08c350b7c"
+}
+```
+### Success Response:
+
+```json
+Success Response:{
+    "success": true,
+    "message": "Restaurant deleted successfully",
+    "data": {}
+}
+```
+
+
+### Error Response:
+
+**If fails, you might receive the following error response with appropriate messages:**
+
+#### Example Response:
+
+```json
+{
+    "success": false,
+    "message": "Restaurant not found"
+}
+```
+**Or if the role not match** :
+
+```json
+{
+    "success": false,
+    "message": "Admin or restaurant owner access required"
+}
+```
+
+**Or if the userId and ownerId not match** :
+
+```json
+{
+    "success": false,
+    "message": "You are not authorized to delete this restaurant"
+}
+```
+
+**If there's an internal error (e.g., MongoDB connection issues)** :
+```json
+
+{
+  "success": false,
+  "message": "Internal Server. Error deleting restaurant."
+}
+```

@@ -67,7 +67,7 @@ const loginUser = async (req: Request, res: Response): Promise<void> => {
       sendErrorResponse(res, 400, "Invalid credentials");
       return
     }
-    const token = jwt.sign({ userId: user._id }, _config.jwt_Secret as string, { expiresIn: '7d' });
+    const token = jwt.sign({ userId: user._id,role:user.role }, _config.jwt_Secret as string, { expiresIn: '7d' });
     res.cookie('token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -170,6 +170,24 @@ const updateUserProfile = async (req: AuthRequest, res: Response):Promise<void> 
   }
 };
 
+const logOutUser = async (req: AuthRequest, res: Response): Promise<void> => {
+  console.log("ha hu g")
+  try {
+    if (!req.userId) return sendErrorResponse(res, 401, "Unauthorized");
+    res.clearCookie("token", {
+      httpOnly: true,
+      secure: true, // Ensure it's secure
+      sameSite: "strict", // Prevent CSRF attacks
+    });
+
+    return sendSuccessResponse(res, 200, "Logged out successfully");
+  } catch (error) {
+    console.error(error);
+    return sendErrorResponse(res, 500, "Internal Server Error");
+  }
+};
+
+
 const DeleteDeliveryAddress = async (req: AuthRequest, res: Response):Promise<void>  => {
   try {
     const userId = req.userId;
@@ -214,4 +232,4 @@ const DeleteDeliveryAddress = async (req: AuthRequest, res: Response):Promise<vo
   }
 };
 
-export { registerUser, loginUser,getUserProfile,updateUserProfile,DeleteDeliveryAddress };
+export { registerUser, loginUser,getUserProfile,updateUserProfile,DeleteDeliveryAddress ,logOutUser};

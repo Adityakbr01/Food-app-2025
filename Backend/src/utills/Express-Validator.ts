@@ -112,3 +112,26 @@ export const updateUserValidator = [
         .withMessage("Please provide a valid Indian ZIP code"),
       
 ];
+
+
+export const createRestaurantValidator = [
+    body("name")
+        .isString().withMessage("Name must be a string")
+        .isLength({ min: 3 }).withMessage("Name must be at least 3 characters"),
+    body("address")
+        .isString().withMessage("Address must be a string")
+        .isLength({ min: 5 }).withMessage("Address must be at least 5 characters"),
+    body("city")
+        .isString().withMessage("City must be a string")
+        .isLength({ min: 4 }).withMessage("City must be at least 2 characters"),
+    body("state")
+        .isString().withMessage("State must be a string")
+        .isLength({ min: 4 }).withMessage("State must be at least 2 characters"),
+    body("zipCode")
+        .matches(/^[1-9][0-9]{5}$/)
+        .withMessage("Please provide a valid Indian ZIP code"),
+    body("phoneNumber")
+        .matches(/^[0-9]{10}$/)
+        .withMessage("Please provide a valid 10-digit phone number"),
+    body("description").isString().isLength({ min: 10 }).withMessage("Description is required"),    
+];
